@@ -23,6 +23,8 @@ import '../general.css';
 const Home = () => {
   const { chosenInput, setChosenInput } = useContext(WDIContext);
   const [inputs, setInputs] = useState([]);
+  const [inputDevice, setInputDevice] = useState('');
+  const [devices, setDevices] = useState([]);
 
   useEffect(() => {
     const getInputs = async () => {
@@ -44,7 +46,24 @@ const Home = () => {
       });
     };
 
+    const getDevices = async () => {
+      const response = await fetch(ip.concat('/getDevices'))
+      if (!response.ok) {
+        console.error(`Error Get Devices: ${response.status}`);
+      }
+      const result = await response.json();
+
+      setDevices(result);
+      console.log(result);
+
+      const selected = result.find(d => d[2] === 1);
+      if (selected) {
+        setInputDevice(selected[0]);
+      }
+    }
+
     getInputs();
+    getDevices();
   }, [setChosenInput]);
 
 
@@ -64,6 +83,21 @@ const Home = () => {
     }
   };
 
+  const changeDevice = async (event) => {
+    setInputDevice(event.target.value);
+    const response = await fetch(ip.concat('/selectDevice'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event.target.value),
+    });
+
+    if (!response.ok) {
+      console.error(`Error Change Device: ${response.status}`);
+    }
+  };
+
   return (
     <div>
       <h1 style={{ textAlign: 'center' }}>WDI Remapper</h1>
@@ -75,6 +109,19 @@ const Home = () => {
             {inputs.map((option) => (
               <option key={option.type} value={option.type}>
                 {option.type}
+              </option>
+            ))}
+          </select>
+        </form>
+      </div>
+
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <form>
+          <label style={{ fontSize: '25px' }}>Input Device: </label>
+          <select name="device" className="select" value={inputDevice} onChange={changeDevice}>
+            {devices.map((option) => (
+              <option key={option[0]} value={option[0]}>
+                {option[0]}
               </option>
             ))}
           </select>
@@ -124,13 +171,21 @@ const Home = () => {
 
       <hr style={{ borderTopWidth: '3px' }} />
 
-      <div style={{ textAlign: 'center' }}>
-        <Link to="/upload">
-          <button className="button"
-            style={{ marginBottom: '20px', marginTop: '20px' }}>Upload Settings
-          </button>
-        </Link>
-      </div>
+      {inputDevice ? (
+        <div style={{ textAlign: 'center' }}>
+          <Link to="/upload">
+            <button className="button"
+              style={{ marginBottom: '20px', marginTop: '20px' }}>Upload Settings
+            </button>
+          </Link>
+        </div>
+      ) :
+        <div style={{ textAlign: 'center' }}>
+            <button className="button" disabled
+              style={{ marginBottom: '20px', marginTop: '20px' }}>Select device to upload.
+            </button>
+        </div>
+      }
 
     </div>
   );

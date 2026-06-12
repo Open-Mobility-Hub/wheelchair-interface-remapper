@@ -21,10 +21,10 @@ from wdi_report import *
 from abc import ABC, abstractmethod
 
 class Remapper(ABC):
-    def __init__(self, device_id, state, settings_path):
+    def __init__(self, device, state, settings_path):
         self.fd = open('/dev/hidg0', 'rb+')
 
-        self.device = evdev.InputDevice(f'/dev/input/event{device_id}')
+        self.device = evdev.InputDevice(device)
         self.state = state
         self.current_STATE = state.STATE
         self.settings_path = settings_path

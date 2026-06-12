@@ -71,7 +71,18 @@ def create_app(state, settings_path):
     @app.route('/STATE')
     def get_state():
         return jsonify(state.STATE)
-
+    
+    @app.route("/getDevices", methods=['GET'])
+    def get_devices():
+        response = jsonify(state.devices)
+        return response
+    
+    @app.route("/selectDevice", methods=['POST'])
+    def select_device():
+        device_name = request.get_json()
+        for d in state.devices:
+            d[2] = 1 if d[0] == device_name else 0
+        return jsonify({'message': 'Device selected successfully'}), 200
 
     @app.route("/getInputs")
     def input():
