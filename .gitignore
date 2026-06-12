@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Build artifacts
+build/
+install/
+log/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Environment / local config
+.env
+.env.local
+*.local
+
+# Runtime configuration (use settings.example.json as a template)
+remapper/settings.json
+
+# Web app (Create React App)
+web-server/wdi-reconfigurer/node_modules
+web-server/wdi-reconfigurer/.pnp
+web-server/wdi-reconfigurer/.pnp.js
+web-server/wdi-reconfigurer/coverage
+web-server/wdi-reconfigurer/build
+
+# External / proprietary ROS messages (provided separately)
+luci-ros2-msgs/

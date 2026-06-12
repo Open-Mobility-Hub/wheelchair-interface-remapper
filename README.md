@@ -1,1 +1,151 @@
-# wheelchair-interface-remapper
+# Wheelchair Interface Remapper
+
+The Wheelchair Interface Remapper lets people drive and control a powered
+wheelchair through alternative input devices. It reads input from a standard
+HID device — a **keyboard**, a **gamepad/joystick**, or a **sip-and-puff**
+sensor — and translates it into the HID control reports that a wheelchair
+controller expects. A web UI lets a clinician or caregiver remap which input
+maps to which wheelchair action without touching code.
+
+This is intended as a flexible, low-cost access platform: pick whatever input
+hardware works best for a given user and remap it to the wheelchair functions
+they need.
+
+> **Status:** Research/prototype code. It runs on real hardware (see
+> [Hardware](#hardware)) and is shared in the hope it is useful. It is **not** a
+> certified medical device. Use it at your own risk and test thoroughly before
+> relying on it.
+
+## Repository layout
+
+| Path | What it is |
+| --- | --- |
+| [`remapper/`](remapper/) | Python core. Reads the input device, applies the active mapping, and writes wheelchair HID reports. Also hosts the Flask configuration API. Entry point: [`remapper/main.py`](remapper/main.py). |
+| [`web-server/wdi-reconfigurer/`](web-server/wdi-reconfigurer/) | React single-page app for editing the input-to-action mappings. |
+| [`ros_remapper/`](ros_remapper/) | ROS 2 (ament_python) package with sip-and-puff nodes (`snp`, `snp-combo`). **Depends on the proprietary `luci_messages` package** — see [ROS 2 components](#ros-2-components-optional). |
+| [`awl_core_msgs/`](awl_core_msgs/) | ROS 2 service definitions (`GetParam`, `UpdateParam`) used by the ROS nodes. |
+
+## How it works
+
+```
+  Input device (keyboard / gamepad / sip-and-puff)
+        │  (Linux evdev: /dev/input/eventN)
+        ▼
+  remapper/main.py ── applies the active mapping from settings.json
+        │                                   ▲
+        │  writes HID report                │ reads/writes mapping
+        ▼                                   │
+  /dev/hidg0 (USB HID gadget)        Flask API (remapper/API.py, port 5000)
+        │                                   ▲
+        ▼                                   │ HTTP
+  Wheelchair controller            React UI (web-server, port 3000)
+```
+
+- The remapper runs a simple state machine:
+  - **RUN** (`STATE = 1`): input events are translated to wheelchair HID reports.
+  - **CONFIGURE** (`STATE = 0`): driving is paused while the mapping is edited
+    through the web UI; the new mapping is written to `settings.json` on upload.
+- Mappings live in [`remapper/settings.json`](remapper/settings.example.json)
+  (a runtime file — see [`settings.example.json`](remapper/settings.example.json)
+  for the format). Per-input default option sets are defined in
+  [`remapper/interface_dicts/`](remapper/interface_dicts/).
+- HID report construction (byte/bit layout for drive, lights, seating, etc.)
+  lives in [`remapper/wdi_report.py`](remapper/wdi_report.py).
+
+## Supported inputs
+
+- **Keyboard** — keys mapped to discrete actions (drive directions, lights,
+  seating, speed, etc.).
+- **Gamepad / joystick** — buttons and analog axes.
+- **Sip-and-puff** — soft/hard sip and puff thresholds mapped to drive commands.
+
+## Getting started
+
+### Prerequisites
+
+- Linux host (the remapper uses Linux `evdev` and a USB **HID gadget** at
+  `/dev/hidg0`). It is designed to run on a single-board computer configured in
+  USB gadget mode (see [Hardware](#hardware)).
+- Python 3.10+
+- Node.js 16+ and npm (for the web UI)
+- Read access to the input device and write access to `/dev/hidg0` (typically
+  requires running as root or adding the appropriate udev rules / group
+  membership).
+
+### 1. Run the remapper + configuration API
+
+```bash
+cd remapper
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# Optional: choose the interface the API binds to (defaults below).
+export REMAPPER_HOST=0.0.0.0      # default 0.0.0.0
+export REMAPPER_PORT=5000         # default 5000
+# Optional: allow the web UI's origin for CORS (comma-separated).
+export REMAPPER_CORS_ORIGINS="http://localhost:3000"
+
+python main.py
+```
+
+On start it lists detected input devices and prompts for a device ID (the `N`
+in `/dev/input/eventN`). The Flask configuration API then listens on
+`REMAPPER_HOST:REMAPPER_PORT`.
+
+### 2. Run the web configuration UI
+
+```bash
+cd web-server/wdi-reconfigurer
+npm install
+
+# Point the UI at the remapper API (defaults to http://localhost:5000).
+cp .env.example .env        # then edit REACT_APP_API_URL if needed
+npm start                   # dev server on http://localhost:3000
+# or
+npm run build               # production build into ./build
+```
+
+Open the UI, choose an input type, remap actions, and upload — the remapper
+picks up the new `settings.json` and resumes driving.
+
+### Configuration
+
+| Variable | Component | Default | Purpose |
+| --- | --- | --- | --- |
+| `REMAPPER_HOST` | remapper API | `0.0.0.0` | Interface the Flask API binds to. |
+| `REMAPPER_PORT` | remapper API | `5000` | Port for the Flask API. |
+| `REMAPPER_CORS_ORIGINS` | remapper API | `http://localhost:3000` | Comma-separated allowed CORS origins. |
+| `REACT_APP_API_URL` | web UI | `http://localhost:5000` | Base URL of the remapper API. |
+
+## ROS 2 components (optional)
+
+The [`ros_remapper/`](ros_remapper/) package provides sip-and-puff nodes for a
+ROS 2 environment, with service definitions in
+[`awl_core_msgs/`](awl_core_msgs/).
+
+> **Important:** `ros_remapper` depends on **`luci_messages`**, a
+> package that is **not** included in this repository. It is available through
+> https://github.com/lucimobility/luci-ros2-sdk.
+
+```bash
+# In a ROS 2 workspace with luci_messages available:
+colcon build --packages-select awl_core_msgs ros_remapper
+# Entry points: snp, snp-combo
+```
+
+## Hardware
+
+The remapper is built to run on a single-board computer (developed on an Orange
+Pi) operating as a **USB HID gadget**. The board reads the chosen input device
+via `evdev` and presents itself to the wheelchair controller as a HID device by
+writing reports to `/dev/hidg0`. Configuring USB gadget mode and the wheelchair
+controller wiring is outside the scope of this repository.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE.md) and
+[NOTICE](NOTICE.md). Third-party components are listed in [NOTICE](NOTICE.md).

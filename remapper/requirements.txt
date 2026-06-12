@@ -1,0 +1,5 @@
+# Python dependencies for the remapper core + configuration API.
+# Install with:  pip install -r requirements.txt
+evdev>=1.6,<2
+Flask>=3.0,<4
+Flask-Cors>=4.0,<7
