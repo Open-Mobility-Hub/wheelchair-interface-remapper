@@ -26,24 +26,20 @@ class Keyboard(Remapper):
             event = self.device.read_one()
             if event.type == evdev.ecodes.EV_KEY and event.code in self.evdev.keys():
                 if event.value == 1:
-                    if self.evdev[event.code] == 'shift':
+                    if self.evdev[event.code] in ('left shift', 'right shift'):
                         self.modifier = modifier.SHIFT
-                    elif self.evdev[event.code] == 'ctrl':
+                    elif self.evdev[event.code] in ('left ctrl', 'right ctrl'):
                         self.modifier = modifier.CTRL
-                    elif self.evdev[event.code] == 'alt':
+                    elif self.evdev[event.code] in ('left alt', 'right alt'):
                         self.modifier = modifier.ALT
-
                     elif self.evdev[event.code] in self.remapping_dict.keys():
                         print(f"{self.evdev[event.code]} pressed")
                         self.buttons.append(
                             self.remapping_dict[self.evdev[event.code]])
                         # self.write_report(get_wdi_report(self.fb, self.lr, self.buttons))
 
-                    elif self.evdev[event.code] == ' ':
-                        self.buttons.append(self.remapping_dict['space'])
-
                 elif event.value == 0:
-                    if self.evdev[event.code] == 'shift' or self.evdev[event.code] == 'ctrl' or self.evdev[event.code] == 'alt':
+                    if self.evdev[event.code] in ('left shift', 'right shift', 'left ctrl', 'right ctrl', 'left alt', 'right alt'):
                         self.modifier = modifier.NONE
                     elif self.evdev[event.code] in self.remapping_dict.keys():
                         self.buttons.remove(
@@ -113,7 +109,7 @@ kb_evdev = {
     evdev.ecodes.KEY_ESC: 'esc',
     evdev.ecodes.KEY_BACKSPACE: 'backspace',
     evdev.ecodes.KEY_TAB: 'tab',
-    evdev.ecodes.KEY_SPACE: ' ',
+    evdev.ecodes.KEY_SPACE: 'space',
     evdev.ecodes.KEY_MINUS: '-',
     evdev.ecodes.KEY_EQUAL: '=',
     evdev.ecodes.KEY_LEFTBRACE: '[',
@@ -138,12 +134,43 @@ kb_evdev = {
     evdev.ecodes.KEY_F10: 'F10',
     evdev.ecodes.KEY_F11: 'F11',
     evdev.ecodes.KEY_F12: 'F12',
-    evdev.ecodes.KEY_LEFTSHIFT: 'shift',
-    evdev.ecodes.KEY_RIGHTSHIFT: 'shift',
-    evdev.ecodes.KEY_LEFTCTRL: 'ctrl',
-    evdev.ecodes.KEY_RIGHTCTRL: 'ctrl',
-    evdev.ecodes.KEY_LEFTALT: 'alt',
-    evdev.ecodes.KEY_RIGHTALT: 'alt'
+    evdev.ecodes.KEY_LEFTSHIFT: 'left shift',
+    evdev.ecodes.KEY_RIGHTSHIFT: 'right shift',
+    evdev.ecodes.KEY_LEFTCTRL: 'left ctrl',
+    evdev.ecodes.KEY_RIGHTCTRL: 'right ctrl',
+    evdev.ecodes.KEY_LEFTALT: 'left alt',
+    evdev.ecodes.KEY_RIGHTALT: 'right alt',
+    evdev.ecodes.KEY_LEFTMETA: 'left meta',
+    evdev.ecodes.KEY_RIGHTMETA: 'right meta',
+    evdev.ecodes.KEY_UP: 'up',
+    evdev.ecodes.KEY_DOWN: 'down',
+    evdev.ecodes.KEY_LEFT: 'left',
+    evdev.ecodes.KEY_RIGHT: 'right',
+    evdev.ecodes.KEY_DELETE: 'delete',
+    evdev.ecodes.KEY_INSERT: 'insert',
+    evdev.ecodes.KEY_HOME: 'home',
+    evdev.ecodes.KEY_END: 'end',
+    evdev.ecodes.KEY_PAGEUP: 'page up',
+    evdev.ecodes.KEY_PAGEDOWN: 'page down',
+    evdev.ecodes.KEY_KP0: 'num0',
+    evdev.ecodes.KEY_KP1: 'num1',
+    evdev.ecodes.KEY_KP2: 'num2',
+    evdev.ecodes.KEY_KP3: 'num3',
+    evdev.ecodes.KEY_KP4: 'num4',
+    evdev.ecodes.KEY_KP5: 'num5',
+    evdev.ecodes.KEY_KP6: 'num6',
+    evdev.ecodes.KEY_KP7: 'num7',
+    evdev.ecodes.KEY_KP8: 'num8',
+    evdev.ecodes.KEY_KP9: 'num9',
+    evdev.ecodes.KEY_KPENTER: 'num enter',
+    evdev.ecodes.KEY_KPMINUS: 'num minus',
+    evdev.ecodes.KEY_KPPLUS: 'num plus',
+    evdev.ecodes.KEY_KPASTERISK: 'num multiply',
+    evdev.ecodes.KEY_KPSLASH: 'num divide',
+    evdev.ecodes.KEY_KPDOT: 'num dot',
+    evdev.ecodes.KEY_KPCOMMA: 'num comma',
+    evdev.ecodes.KEY_KPEQUAL: 'num equal',
+    evdev.ecodes.KEY_NUMLOCK: 'num lock',
 }
 
 class modifier(Enum):
