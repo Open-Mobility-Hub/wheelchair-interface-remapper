@@ -26,42 +26,40 @@ class Keyboard(Remapper):
             event = self.device.read_one()
             if event.type == evdev.ecodes.EV_KEY and event.code in self.evdev.keys():
                 if event.value == 1:
-                    if self.evdev[event.code] in ('left shift', 'right shift'):
-                        self.modifier = modifier.SHIFT
-                    elif self.evdev[event.code] in ('left ctrl', 'right ctrl'):
-                        self.modifier = modifier.CTRL
-                    elif self.evdev[event.code] in ('left alt', 'right alt'):
-                        self.modifier = modifier.ALT
-                    elif self.evdev[event.code] in self.remapping_dict.keys():
-                        print(f"{self.evdev[event.code]} pressed")
-                        self.buttons.append(
-                            self.remapping_dict[self.evdev[event.code]])
-                        # self.write_report(get_wdi_report(self.fb, self.lr, self.buttons))
+                    self.buttons.add(self.evdev[event.code])
 
                 elif event.value == 0:
-                    if self.evdev[event.code] in ('left shift', 'right shift', 'left ctrl', 'right ctrl', 'left alt', 'right alt'):
-                        self.modifier = modifier.NONE
-                    elif self.evdev[event.code] in self.remapping_dict.keys():
-                        self.buttons.remove(
-                            self.remapping_dict[self.evdev[event.code]])
-                        # self.write_report(get_wdi_report(self.fb, self.lr, self.buttons))
-                # else:
-                    # when keys are held
-                    # if self.evdev[event.code] in self.remapping_dict.values():
-                        # self.write_report(get_wdi_report(self.fb, self.lr, self.buttons))
+                    self.buttons.discard(self.evdev[event.code])
+
+            actions = []
+            consumed = set()
+            for mapping_key, wdi_action in self.remapping_dict.items():
+                if "+" in mapping_key:
+                    keys = mapping_key.split("+", 1)
+                    if keys[0] in self.buttons and keys[1] in self.buttons:
+                        actions.append(wdi_action)
+                        consumed.add(keys[0])
+                        consumed.add(keys[1])
+            
+            for mapping_key, wdi_action in self.remapping_dict.items():
+                if "+" not in mapping_key:
+                    if mapping_key in self.buttons and mapping_key not in consumed:
+                        actions.append(wdi_action)
+
             self.fb = 0
             self.lr = 0
             for drive_cmd in drive_map.keys():
-                if drive_cmd in self.buttons:
-                    self.fb, self.lr = drive_map[drive_cmd]
+                if drive_cmd in actions:
+                    fb, lr = drive_map[drive_cmd]
+                    self.fb += fb
+                    self.lr += lr
             self.fb *= self.fwd_back_scale
             self.lr *= self.left_right_scale
 
-            self.write_report(get_wdi_report(self.fb, self.lr, self.buttons))
+            self.write_report(get_wdi_report(self.fb, self.lr, actions))
 
     def get_dicts(self):
         self.evdev = kb_evdev
-        self.modifier = modifier.NONE
 
         self.fb = 0
         self.lr = 0
@@ -172,9 +170,3 @@ kb_evdev = {
     evdev.ecodes.KEY_KPEQUAL: 'num equal',
     evdev.ecodes.KEY_NUMLOCK: 'num lock',
 }
-
-class modifier(Enum):
-    NONE = 0
-    SHIFT = 1
-    CTRL = 2
-    ALT = 3

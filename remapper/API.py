@@ -50,10 +50,15 @@ def load_state_from_settings(state, settings_path):
         state.settings['Memory'] = None
         state.settings['Seating'] = None
 
+    action_to_key = {v: k for k, v in data.items() if k not in ["input", "disabled"]}
+    disabled_actions = data.get("disabled", [])
     for d in state.settings.values():
         if d is not None:
-            for key in d.keys():
-                d[key] = data[key]
+            for action in d.keys():
+                if action in action_to_key:
+                    d[action] = action_to_key[action]
+                elif action in disabled_actions:
+                    d[action] = "N/A"
 
 def create_app(state, settings_path):
     app = Flask(__name__)
@@ -186,10 +191,12 @@ def create_app(state, settings_path):
             }
         else:
             combined_settings = {k: v for d in state.settings.values() if d is not None for k, v in d.items()}
-            reversed_settings = {v: k for k, v in combined_settings.items()}
+            reversed_settings = {v: k for k, v in combined_settings.items() if v != "N/A"}
+            disabled = [k for k, v in combined_settings.items() if v == "N/A"]
             settings_dictionary = {
                 **input_dict,
-                **reversed_settings
+                **reversed_settings,
+                "disabled": disabled
             }
 
         with open(settings_path, "w") as outfile:

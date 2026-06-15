@@ -15,59 +15,60 @@
 from collections import OrderedDict
 
 GP_Drive_settings = {
-    "Drive Forward": "POS_ABS_Y",
-    "Drive Backward": "NEG_ABS_Y",
+    "Drive Forward": "NEG_ABS_Y",
+    "Drive Backward": "POS_ABS_Y",
     "Drive Left": "NEG_ABS_X",
     "Drive Right": "POS_ABS_X",
-    "Emergency Stop": "",
-    "Device Control Toggle": "",
-    "Enable Device Control": "",
-    "Disable Device Control": ""
+    "Emergency Stop": "BTN_SOUTH",
+    "Device Control Toggle": "BTN_START",
+    "Enable Device Control": "BTN_C",
+    "Disable Device Control": "BTN_MODE"
 }
 
 GP_Chair_settings = {
-    "Power/Sleep Toggle": "",
-    "Open/Close User Menu": "",
-    "Switch Mode": "",
-    "Headlight Toggle": "",
-    "Hazard Lights": "",
-    "Left Blinker": "",
-    "Right Blinker": "",
-    "Horn": ""
+    "Power/Sleep Toggle": "BTN_SELECT",
+    "Open/Close User Menu": "BTN_SELECT",
+    "Switch Mode": "DPAD_DOWN",
+    "Headlight Toggle": "BTN_THUMBL",
+    "Hazard Lights": "BTN_WEST",
+    "Left Blinker": "DPAD_LEFT",
+    "Right Blinker": "DPAD_RIGHT",
+    "Horn": "BTN_THUMBR"
 }
 
 GP_Profile_settings = {
-    "Increase Speed": "",
-    "Decrease Speed": "",
-    "Speed 1": "",
-    "Speed 2": "",
-    "Speed 3": "",
-    "Speed 4": "",
-    "Speed 5": "",
-    "Increase Profile": "",
-    "Decrease Profile": ""
+    "Increase Speed": "BTN_TR",
+    "Decrease Speed": "BTN_TL",
+    "Speed 1": "N/A",
+    "Speed 2": "N/A",
+    "Speed 3": "N/A",
+    "Speed 4": "N/A",
+    "Speed 5": "N/A",
+    "Increase Profile": "DPAD_UP",
+    "Decrease Profile": "N/A"
 }
 
 GP_Memory_settings = {
-    "Memory 1 Forward": "",
-    "Memory 1 Backward": "",
-    "Memory 2 Forward": "",
-    "Memory 2 Backward": "",
-    "Memory 3 Forward": "",
-    "Memory 3 Backward": ""
+    "Memory Seating 1": "BTN_TRIGGER_HAPPY1",
+    "Memory Seating 2": "BTN_TRIGGER_HAPPY2",
+    "Memory Seating 3": "BTN_TRIGGER_HAPPY3",
+    "Memory Seating 4": "BTN_TRIGGER_HAPPY4",
+    "Memory Seating 5": "BTN_TRIGGER_HAPPY5",
+    "Memory Seating 6": "BTN_TRIGGER_HAPPY6",
+    "Memory Seating Home": "BTN_TRIGGER_HAPPY7"
 }
 
 GP_Seating_settings = {
-    "Tilt Forward": "N/A",
-    "Tilt Backward": "N/A",
-    "Recline Forward": "N/A",
-    "Recline Backward": "N/A",
-    "Legrest Up": "N/A",
-    "Legrest Down": "N/A",
-    "Elevate Up": "N/A",
-    "Elevate Down": "N/A",
-    "Footplates Up": "N/A",
-    "Footplates Down": "N/A",
-    "Stand Up": "N/A",
-    "Stand Down": "N/A"
+    "Tilt Forward": "BTN_TRIGGER_HAPPY9",
+    "Tilt Backward": "BTN_TRIGGER_HAPPY8+BTN_TRIGGER_HAPPY9",
+    "Recline Forward": "BTN_TRIGGER_HAPPY10",
+    "Recline Backward": "BTN_TRIGGER_HAPPY8+BTN_TRIGGER_HAPPY10",
+    "Legrest Up": "BTN_TRIGGER_HAPPY11",
+    "Legrest Down": "BTN_TRIGGER_HAPPY8+BTN_TRIGGER_HAPPY11",
+    "Elevate Up": "BTN_TRIGGER_HAPPY12",
+    "Elevate Down": "BTN_TRIGGER_HAPPY8+BTN_TRIGGER_HAPPY12",
+    "Footplates Up": "BTN_TRIGGER_HAPPY13",
+    "Footplates Down": "BTN_TRIGGER_HAPPY8+BTN_TRIGGER_HAPPY13",
+    "Stand Up": "BTN_TRIGGER_HAPPY14",
+    "Stand Down": "BTN_TRIGGER_HAPPY8+BTN_TRIGGER_HAPPY14"
 }

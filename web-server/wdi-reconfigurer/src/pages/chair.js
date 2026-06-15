@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from "react-router-dom";
 import { WDIContext, ip } from '../App';
+import ComboSelect from '../components/ComboSelect';
 
 import '../general.css';
 
@@ -97,14 +98,12 @@ const Chair = () => {
       {chairSettings.map((s, index) => (
         <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
           <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
-          <select name={s.setting} className="select" value={s.value} onChange={changeSettings}>
-            <option value=''>--Default--</option>
-            {inputOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <ComboSelect
+            name={s.setting}
+            value={s.value}
+            inputOptions={inputOptions}
+            onChange={changeSettings}
+          />
           {errorSetting && errorSetting[0] === s.setting && <p style={{color: 'red'}}>{errorSetting[1]} is already in use.</p>}
         </div>
       ))}

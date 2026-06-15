@@ -47,7 +47,7 @@ class AppState():
                 'num enter', 'num plus', 'num minus', 'num multiply', 'num divide', 'num dot', 'num comma', 'num equal', 'num lock',
                 'left shift', 'right shift', 'left ctrl', 'right ctrl', 'left alt', 'right alt', 'left meta', 'right meta'
             ],
-            'GP': ['BTN_NORTH', 'BTN_SOUTH', 'BTN_EAST', 'BTN_WEST', "BTN_START", "BTN_SELECT", "BTN_MODE",
+            'GP': ['BTN_C', 'BTN_NORTH', 'BTN_SOUTH', 'BTN_EAST', 'BTN_WEST', "BTN_START", "BTN_SELECT", "BTN_MODE",
                     "BTN_TL", "BTN_TR", "BTN_TL2", "BTN_TR2",
                     "POS_ABS_X", "POS_ABS_Y", "POS_ABS_RX", "POS_ABS_RY",
                     "NEG_ABS_X", "NEG_ABS_Y", "NEG_ABS_RX", "NEG_ABS_RY",

@@ -28,7 +28,7 @@ class Remapper(ABC):
         self.state = state
         self.current_STATE = state.STATE
         self.settings_path = settings_path
-        self.buttons = []
+        self.buttons = set()
 
         self.write_report(get_wdi_report(["Enable Device Control"]))
         self.write_report(bytes([0x00]) * 8)
