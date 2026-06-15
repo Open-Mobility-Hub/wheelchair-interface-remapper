@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import evdev
-from enum import Enum
 import select
 
 from remapper import Remapper
@@ -24,7 +23,7 @@ class Keyboard(Remapper):
         r, _, _ = select.select([self.device], [], [], 0.1)
         if r:
             event = self.device.read_one()
-            if event.type == evdev.ecodes.EV_KEY and event.code in self.evdev.keys():
+            if event.type == evdev.ecodes.EV_KEY and event.code in self.evdev:
                 if event.value == 1:
                     self.buttons.add(self.evdev[event.code])
 
@@ -65,8 +64,6 @@ class Keyboard(Remapper):
     def get_dicts(self):
         self.evdev = kb_evdev
 
-        self.fb = 0
-        self.lr = 0
         self.fwd_back_scale = self.state.settings['Speed']["Forward Backward Speed"]
         self.left_right_scale = self.state.settings['Speed']["Left Right Speed"]
 

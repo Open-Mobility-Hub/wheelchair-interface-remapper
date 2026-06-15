@@ -62,21 +62,22 @@ const Memory = () => {
   }, [chosenInput]);
 
   useEffect(() => {
+    const getSettings = async () => {
+      const response = await fetch(ip.concat(`/getMemorySettings?layer=${layer}`));
+
+      if (!response.ok) {
+        console.error(`Error Get Memory Settings: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
+      setMemorySettings(settings);
+    };
+
     getSettings();
     setErrorSetting(null);
   }, [layer]);
 
-  const getSettings = async () => {
-    const response = await fetch(ip.concat(`/getMemorySettings?layer=${layer}`));
-
-    if (!response.ok) {
-      console.error(`Error Get Memory Settings: ${response.status}`);
-    }
-
-    const result = await response.json();
-    const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
-    setMemorySettings(settings);
-  };
 
   const changeSettings = async (event) => {
     setErrorSetting(null);
@@ -98,11 +99,21 @@ const Memory = () => {
         value: event.target.value
       }),
     });
-    setMemorySettings(updatedSettings);
 
+    if (response.status === 409) {
+      setErrorSetting([event.target.name, [], 409]);
+      return;
+    }
+
+    setMemorySettings(updatedSettings);
     const result = await response.json();
     if (result.changed_setting !== null) {
-      setErrorSetting([event.target.name, result.changed_setting]);
+      setErrorSetting([event.target.name, result.changed_setting, 200]);
+      if (result.changed_setting[0] === 'Memory') {
+        setMemorySettings(prevSettings => prevSettings.map(s =>
+          s.setting === result.changed_setting[1] ? { ...s, value: 'N/A' } : s
+        ));
+      }
     } else {
       setErrorSetting(null);
     }
@@ -112,10 +123,10 @@ const Memory = () => {
     <div style={{ textAlign: 'center' }}>
       <h1>Memory Settings</h1>
 
-      <select value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+      <select className="select" value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
         {Array.from({ length: numLayers }, (_, i) => (
           <option key={i} value={i}>
-            Layer {i}
+            Layer {i + 1}
           </option>
         ))}
       </select>
@@ -129,8 +140,11 @@ const Memory = () => {
             inputOptions={inputOptions}
             onChange={changeSettings}
           />
-          {errorSetting && errorSetting[0] === s.setting && <p style={{ color: 'red' }}>
-            {errorSetting[1][1]} ({errorSetting[1][0]}) set to "N/A"</p>}
+          {errorSetting && errorSetting[0] === s.setting &&
+            (errorSetting[2] === 409
+            ? (<p style={{ color: 'red' }}>Can not set key as layer key.</p>)
+            : (<p style={{ color: 'red' }}>{errorSetting[1][1]} ({errorSetting[1][0]}) set to "N/A"</p>)
+            )}
         </div>
       ))}
 

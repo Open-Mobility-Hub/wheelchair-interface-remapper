@@ -32,22 +32,17 @@ class Gamepad(Remapper):
                     elif event.value == 0:
                         self.buttons.discard(btn)
                 elif event.type == evdev.ecodes.EV_ABS:
-                    if event.code == evdev.ecodes.ABS_HAT0X:
+                    if event.code in DPAD_AXES:
+                        pos, neg = DPAD_AXES[event.code]
                         if event.value == -1:
-                            self.buttons.add("DPAD_LEFT")
+                            self.buttons.add(pos)
+                            self.buttons.discard(neg)
                         elif event.value == 1:
-                            self.buttons.add("DPAD_RIGHT")
-                        elif event.value == 0:
-                            self.buttons.discard("DPAD_LEFT")
-                            self.buttons.discard("DPAD_RIGHT")
-                    elif event.code == evdev.ecodes.ABS_HAT0Y:
-                        if event.value == -1:
-                            self.buttons.add("DPAD_UP")
-                        elif event.value == 1:
-                            self.buttons.add("DPAD_DOWN")
-                        elif event.value == 0:
-                            self.buttons.discard("DPAD_UP")
-                            self.buttons.discard("DPAD_DOWN")
+                            self.buttons.add(neg)
+                            self.buttons.discard(pos)
+                        else:
+                            self.buttons.discard(pos)
+                            self.buttons.discard(neg)
                     elif event.code in JOYSTICK_AXES:
                         if self.axes_locked[event.code]:
                             if event.value == 0:
@@ -99,13 +94,15 @@ class Gamepad(Remapper):
                             if lr != 0:
                                 self.lr += lr * self.axis_values.get(mapping_key, self.left_right_scale)
                         else:
-                            actions.append(wdi_action)
+                            if any(mapping_key in pair for pair in JOYSTICK_AXES.values()):
+                                if self.axis_values.get(mapping_key, 0) > 90:
+                                    actions.append(wdi_action)
+                            else:
+                                actions.append(wdi_action)
 
             self.write_report(get_wdi_report(self.fb, self.lr, actions))
 
     def get_dicts(self):
-        self.fb = 0
-        self.lr = 0
         self.fwd_back_scale = self.state.settings['Speed']["Forward Backward Speed"]
         self.left_right_scale = self.state.settings['Speed']["Left Right Speed"]
 
@@ -124,7 +121,7 @@ class Gamepad(Remapper):
                 abs_info = self.device.absinfo(axis)
                 self.abs_max[axis] = abs_info.max
                 self.abs_min[axis] = abs(abs_info.min)
-            except:
+            except Exception:
                 pass
 
 gp_evdev = {
@@ -160,6 +157,10 @@ gp_evdev = {
     evdev.ecodes.BTN_TRIGGER_HAPPY16: 'BTN_TRIGGER_HAPPY16',
 }
 
+DPAD_AXES = {
+    evdev.ecodes.ABS_HAT0X: ("DPAD_LEFT", "DPAD_RIGHT"),
+    evdev.ecodes.ABS_HAT0Y: ("DPAD_UP", "DPAD_DOWN")
+}
 JOYSTICK_AXES = {
     evdev.ecodes.ABS_X: ("POS_ABS_X", "NEG_ABS_X"),
     evdev.ecodes.ABS_Y: ("POS_ABS_Y", "NEG_ABS_Y"),

@@ -84,6 +84,12 @@ def load_state_from_settings(state, settings_path):
         if key in data:
             state.settings['Speed'][key] = data[key]
 
+    for d in state.devices:
+        if d[0] == data.get("device", ""):
+            d[2] = 1
+        else:
+            d[2] = 0
+
 
 def create_app(state, settings_path):
     app = Flask(__name__)
@@ -111,7 +117,7 @@ def create_app(state, settings_path):
     def select_device():
         device_name = request.get_json()
         for d in state.devices:
-            d[2] = 1 if d[0] == device_name else 0
+            d[2] = 1 if d[1] == device_name else 0
         return jsonify({'message': 'Device selected successfully'}), 200
 
     @app.route("/getInputs")
@@ -194,6 +200,9 @@ def create_app(state, settings_path):
     def change_settings():
         newSetting = request.get_json()
 
+        if newSetting['value'] == state.layer_key:
+            return jsonify({'message': 'Cannot assign layer key to a setting'}), 409
+
         layer_setting = state.settings['layers'][newSetting['layer']]
         
         changed_setting = None
@@ -275,6 +284,7 @@ def create_app(state, settings_path):
             if state.inputs[key] == 1:
                 chosen_input = key
         input_dict = {"input": chosen_input}
+        selected_device = {"device": d[0] for d in state.devices if d[2] == 1}
 
         # TODO: SNP upload broken — state.settings['Drive'] removed with layer refactor, fix in SNP rework
         if chosen_input == "Sip-n-Puff":
@@ -294,8 +304,10 @@ def create_app(state, settings_path):
                     **reversed_settings,
                     "disabled": disabled
                 })
+            
             settings_dictionary = {
                 **input_dict,
+                **selected_device,
                 "layer_key": state.layer_key,
                 **state.settings['Speed'],
                 "layers": layers_list
