@@ -31,8 +31,8 @@ KB_Chair_settings = {
     "Switch Mode": "tab",
     "Headlight Toggle": "l",
     "Hazard Lights": "h",
-    "Left Blinker": "<",
-    "Right Blinker": ">",
+    "Left Blinker": "left shift+,",
+    "Right Blinker": "left shift+.",
     "Horn": "space"
 }
 
@@ -44,8 +44,8 @@ KB_Profile_settings = {
     "Speed 3": "3",
     "Speed 4": "4",
     "Speed 5": "5",
-    "Increase Profile": ",",
-    "Decrease Profile": "."
+    "Increase Profile": ".",
+    "Decrease Profile": ","
 }
 
 KB_Memory_settings = {
@@ -59,16 +59,16 @@ KB_Memory_settings = {
 }
 
 KB_Seating_settings = {
-    "Tilt Forward": "N/A",
-    "Tilt Backward": "N/A",
-    "Recline Forward": "N/A",
-    "Recline Backward": "N/A",
-    "Legrest Up": "N/A",
-    "Legrest Down": "N/A",
-    "Elevate Up": "N/A",
-    "Elevate Down": "N/A",
-    "Footplates Up": "N/A",
-    "Footplates Down": "N/A",
-    "Stand Up": "N/A",
-    "Stand Down": "N/A"
+    "Tilt Forward": "left shift+num0",
+    "Tilt Backward": "left ctrl+num0",
+    "Recline Forward": "left shift+num1",
+    "Recline Backward": "left ctrl+num1",
+    "Legrest Up": "left shift+num2",
+    "Legrest Down": "left ctrl+num2",
+    "Elevate Up": "left shift+num3",
+    "Elevate Down": "left ctrl+num3",
+    "Footplates Up": "left shift+num4",
+    "Footplates Down": "left ctrl+num4",
+    "Stand Up": "left shift+num dot",
+    "Stand Down": "left ctrl+num dot"
 }
