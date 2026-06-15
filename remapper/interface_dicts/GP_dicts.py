@@ -14,6 +14,11 @@
 
 from collections import OrderedDict
 
+GP_Speed_settings = {
+    "Forward Backward Speed": 60,
+    "Left Right Speed": 75
+}
+
 GP_Drive_settings = {
     "Drive Forward": "NEG_ABS_Y",
     "Drive Backward": "POS_ABS_Y",

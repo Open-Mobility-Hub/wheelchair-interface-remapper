@@ -63,8 +63,8 @@ class Keyboard(Remapper):
 
         self.fb = 0
         self.lr = 0
-        self.fwd_back_scale = 75
-        self.left_right_scale = 60
+        self.fwd_back_scale = self.state.settings['Speed']["Forward Backward Speed"]
+        self.left_right_scale = self.state.settings['Speed']["Left Right Speed"]
 
 kb_evdev = {
     evdev.ecodes.KEY_A: 'a',

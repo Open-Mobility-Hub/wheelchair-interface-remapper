@@ -20,23 +20,6 @@ from wdi_report import *
 
 
 class Gamepad(Remapper):
-    def get_dicts(self):
-        self.fb = 0
-        self.lr = 0
-        self.fwd_back_scale = 75
-        self.left_right_scale = 60
-
-        self.axis_values = {}
-
-        self.abs_max = {}
-        self.abs_min = {}
-        for axis in JOYSTICK_AXES:
-            try:
-                abs_info = self.device.absinfo(axis)
-                self.abs_max[axis] = abs_info.max
-                self.abs_min[axis] = abs(abs_info.min)
-            except:
-                pass
 
     def RUN(self):
         r, _, _ = select.select([self.device], [], [], 0.1)
@@ -110,6 +93,23 @@ class Gamepad(Remapper):
 
             self.write_report(get_wdi_report(self.fb, self.lr, actions))
 
+    def get_dicts(self):
+        self.fb = 0
+        self.lr = 0
+        self.fwd_back_scale = self.state.settings['Speed']["Forward Backward Speed"]
+        self.left_right_scale = self.state.settings['Speed']["Left Right Speed"]
+
+        self.axis_values = {}
+
+        self.abs_max = {}
+        self.abs_min = {}
+        for axis in JOYSTICK_AXES:
+            try:
+                abs_info = self.device.absinfo(axis)
+                self.abs_max[axis] = abs_info.max
+                self.abs_min[axis] = abs(abs_info.min)
+            except:
+                pass
 
 gp_evdev = {
     evdev.ecodes.BTN_C: 'BTN_C',

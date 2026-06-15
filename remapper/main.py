@@ -60,6 +60,7 @@ class AppState():
             'Sip-n-Puff': ["Soft Sip", "Hard Sip", "Soft Puff", "Hard Puff"]
         }
         self.settings = {
+            'Speed': None,
             'Drive': None,
             'Chair': None,
             'Profile': None,
