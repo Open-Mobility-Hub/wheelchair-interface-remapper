@@ -32,18 +32,21 @@ def load_state_from_settings(state, settings_path):
 
     active_input = next(key for key, value in state.inputs.items() if value == 1)
     if active_input == "Keyboard":
+        state.settings['Speed'] = KB_Speed_settings
         state.settings['Drive'] = KB_Drive_settings
         state.settings['Chair'] = KB_Chair_settings
         state.settings['Profile'] = KB_Profile_settings
         state.settings['Memory'] = KB_Memory_settings
         state.settings['Seating'] = KB_Seating_settings
     elif active_input == "GP":
+        state.settings['Speed'] = GP_Speed_settings
         state.settings['Drive'] = GP_Drive_settings
         state.settings['Chair'] = GP_Chair_settings
         state.settings['Profile'] = GP_Profile_settings
         state.settings['Memory'] = GP_Memory_settings
         state.settings['Seating'] = GP_Seating_settings
     elif active_input == "Sip-n-Puff":
+        state.settings['Speed'] = SNP_Speed_settings
         state.settings['Drive'] = SNP_Drive_settings
         state.settings['Chair'] = None
         state.settings['Profile'] = None
@@ -52,13 +55,18 @@ def load_state_from_settings(state, settings_path):
 
     action_to_key = {v: k for k, v in data.items() if k not in ["input", "disabled"]}
     disabled_actions = data.get("disabled", [])
-    for d in state.settings.values():
-        if d is not None:
+    for key, d in state.settings.items():
+        if d is not None and key != 'Speed':
             for action in d.keys():
                 if action in action_to_key:
                     d[action] = action_to_key[action]
                 elif action in disabled_actions:
                     d[action] = "N/A"
+
+    for key in state.settings['Speed'].keys():
+        if key in data:
+            state.settings['Speed'][key] = data[key]
+
 
 def create_app(state, settings_path):
     app = Flask(__name__)
@@ -101,18 +109,21 @@ def create_app(state, settings_path):
         input = request.get_json()
 
         if input == "Keyboard":
+            state.settings['Speed'] = KB_Speed_settings
             state.settings['Drive'] = KB_Drive_settings
             state.settings['Chair'] = KB_Chair_settings
             state.settings['Profile'] = KB_Profile_settings
             state.settings['Memory'] = KB_Memory_settings
             state.settings['Seating'] = KB_Seating_settings
         elif input == "GP":
+            state.settings['Speed'] = GP_Speed_settings
             state.settings['Drive'] = GP_Drive_settings
             state.settings['Chair'] = GP_Chair_settings
             state.settings['Profile'] = GP_Profile_settings
             state.settings['Memory'] = GP_Memory_settings
             state.settings['Seating'] = GP_Seating_settings
         elif input == "Sip-n-Puff":
+            state.settings['Speed'] = SNP_Speed_settings
             state.settings['Drive'] = SNP_Drive_settings
             state.settings['Chair'] = None
             state.settings['Profile'] = None
@@ -137,6 +148,11 @@ def create_app(state, settings_path):
         return response
 
     # all of these functions below can be generalized
+    @app.route("/getSpeedSettings")
+    def get_speed_settings():
+        response = jsonify(state.settings['Speed'])
+        return response
+
     @app.route("/getDriveSettings")
     def get_drive_settings():
         response = jsonify(state.settings['Drive'])
@@ -166,11 +182,18 @@ def create_app(state, settings_path):
     def change_settings():
         newSetting = request.get_json()
         
-        for d in state.settings.values():
-            if d is not None:
+        for key, d in state.settings.items():
+            if d is not None and key != 'Speed':
                 for key in d.keys():
                     if d[key] == newSetting['value'] and key != newSetting['setting']:
                         return jsonify({'message': 'Value already exists in settings'}), 409
+            elif key == 'Speed':
+                for key in d.keys():
+                    if key == newSetting['setting']:
+                        if not isinstance(newSetting['value'], int):
+                            return jsonify({'message': 'Speed setting value must be an integer'}), 409
+                        if newSetting['value'] < 0 or newSetting['value'] > 100:
+                            return jsonify({'message': 'Speed setting value must be between 0 and 100'}), 409
         state.settings[newSetting['mode']][newSetting['setting']] = newSetting['value']
 
         return jsonify({'message': 'Setting updated successfully'}), 200
@@ -190,11 +213,13 @@ def create_app(state, settings_path):
                 **state.settings['Drive']
             }
         else:
-            combined_settings = {k: v for d in state.settings.values() if d is not None for k, v in d.items()}
+            speed_settings = {k: v for k, v in state.settings['Speed'].items() if isinstance(v, int)}
+            combined_settings = {k: v for key, d in state.settings.items() if d is not None and key!= 'Speed' for k, v in d.items()}
             reversed_settings = {v: k for k, v in combined_settings.items() if v != "N/A"}
             disabled = [k for k, v in combined_settings.items() if v == "N/A"]
             settings_dictionary = {
                 **input_dict,
+                **speed_settings,
                 **reversed_settings,
                 "disabled": disabled
             }

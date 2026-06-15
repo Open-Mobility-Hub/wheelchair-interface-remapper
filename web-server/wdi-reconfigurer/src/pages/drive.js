@@ -24,6 +24,7 @@ import '../general.css';
 const Drive = () => {
   const { chosenInput } = useContext(WDIContext);
   const [inputOptions, setInputOptions] = useState([]);
+  const [speedSettings, setSpeedSettings] = useState([]);
   const [driveSettings, setDriveSettings] = useState([]);
   const [errorSetting, setErrorSetting] = useState(null);
 
@@ -57,8 +58,20 @@ const Drive = () => {
       setDriveSettings(settings);
     };
 
+    const getSpeedSettings = async (event) => {
+      const response = await fetch(ip.concat('/getSpeedSettings'));
+      
+      if (!response.ok) {
+        console.error(`Error Get Speed Settings: ${response.status}`);
+      }
+      const result = await response.json();
+      const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
+      setSpeedSettings(settings);
+    };
+
     getOptions();
     getSettings();
+    getSpeedSettings();
   }, [chosenInput]);
 
   const changeSettings = async (event) => {
@@ -90,10 +103,54 @@ const Drive = () => {
     }
   };
 
+  const changeSpeedSettings = async (event) => {
+    setErrorSetting(null);
+    const updatedSettings = [...speedSettings];
+    for (let i = 0; i < updatedSettings.length; i++) {
+      if (updatedSettings[i].setting === event.target.name) {
+        updatedSettings[i].value = event.target.value
+      }
+    }
+    const response = await fetch(ip.concat('/changeSettings'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        mode: 'Speed',
+        setting: event.target.name,
+        value: parseInt(event.target.value)
+      }),
+    });
+    if (!response.ok) {
+      if (response.status === 409) {
+        setErrorSetting([event.target.name, event.target.value]);
+      }
+      console.error(`Error Updating Speed Settings: ${response.status}`);
+    } else {
+      setSpeedSettings(updatedSettings)
+    }
+  };
 
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>Drive Settings</h1>
+
+      {speedSettings.map((s, index) => (
+        <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
+          <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
+          <input
+            type="number"
+            name={s.setting}
+            value={s.value}
+            min={0}
+            max={100}
+            onChange={changeSpeedSettings}>
+          </input>
+          {errorSetting && errorSetting[0] === s.setting && <p style={{color: 'red'}}>Invalid speed setting.</p>}
+        </div>
+       ))
+      }
 
       {driveSettings.map((s, index) => (
         <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>

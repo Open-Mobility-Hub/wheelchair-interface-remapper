@@ -14,6 +14,11 @@
 
 from collections import OrderedDict
 
+SNP_Speed_settings = {
+    "Forward Backward Speed": 60,
+    "Left Right Speed": 75
+}
+
 SNP_Drive_settings = {
     "Soft Sip Min": -10,
     "Soft Sip Max": -30,

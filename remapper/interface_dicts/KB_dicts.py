@@ -14,6 +14,11 @@
 
 from collections import OrderedDict
 
+KB_Speed_settings = {
+    "Forward Backward Speed": 60,
+    "Left Right Speed": 75
+}
+
 KB_Drive_settings = {
     "Drive Forward": "w",
     "Drive Backward": "s",
