@@ -22,16 +22,20 @@ from abc import ABC, abstractmethod
 
 class Remapper(ABC):
     def __init__(self, device, state, settings_path):
-        self.fd = open('/dev/hidg0', 'rb+')
+        self.fd = open('/dev/hidg0', 'rb+', buffering=0)
 
-        self.device = evdev.InputDevice(device)
+        try:
+            self.device = evdev.InputDevice(device)
+        except Exception as e:
+            print(f"Error opening device {device}: {e}")
+            raise e
         self.state = state
         self.current_STATE = state.STATE
         self.settings_path = settings_path
         self.buttons = set()
 
-        self.write_report(get_wdi_report(["Enable Device Control"]))
-        self.write_report(bytes([0x00]) * 8)
+        self.write_report(get_wdi_report(0, 0, ["Enable Device Control"]))
+        self.write_report(get_wdi_report(0, 0, []))
 
         with open(self.settings_path, 'r') as f:
             self.remapping_dict = json.load(f)
