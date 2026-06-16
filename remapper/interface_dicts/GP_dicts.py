@@ -31,7 +31,7 @@ GP_Drive_settings = {
 }
 
 GP_Chair_settings = {
-    "Power/Sleep Toggle": "BTN_SELECT",
+    "Power/Sleep Toggle": "N/A",
     "Open/Close User Menu": "BTN_SELECT",
     "Switch Mode": "DPAD_DOWN",
     "Headlight Toggle": "BTN_THUMBL",

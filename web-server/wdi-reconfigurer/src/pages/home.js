@@ -25,6 +25,11 @@ const Home = () => {
   const [inputs, setInputs] = useState([]);
   const [inputDevice, setInputDevice] = useState('');
   const [devices, setDevices] = useState([]);
+  const [numLayers, setNumLayers] = useState(0);
+  const [layer, setLayer] = useState(0);
+  const [layerKey, setLayerKey] = useState('');
+  const [inputOptions, setInputOptions] = useState([]);
+  const [errorSetting, setErrorSetting] = useState(null);
 
   useEffect(() => {
     const getInputs = async () => {
@@ -62,14 +67,53 @@ const Home = () => {
       }
     }
 
+    const getLayer = async (event) => {
+      const response = await fetch(ip.concat('/getLayers'));
+
+      if (!response.ok) {
+        console.error(`Error Get Layer: ${response.status}`);
+      }
+      const result = await response.json();
+      setNumLayers(result.count);
+    };
+
+    const getLayerKey = async (event) => {
+      const response = await fetch(ip.concat('/getLayerKey'));
+
+      if (!response.ok) {
+        console.error(`Error Get Layer Key: ${response.status}`);
+      }
+      const result = await response.json();
+      setLayerKey(result.layer_key ?? '');
+    };
+
+    const getOptions = async (event) => {
+      const response = await fetch(ip.concat('/getOptions'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(chosenInput),
+      });
+
+      if (!response.ok) {
+        console.error(`Error Get Options: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setInputOptions(result);
+    };
+
     getInputs();
     getDevices();
-  }, [setChosenInput]);
+    getLayer();
+    getLayerKey();
+    getOptions();
+  }, [chosenInput]);
 
 
 
   const changeInput = async (event) => {
-    setChosenInput(event.target.value);
     const response = await fetch(ip.concat('/changeInput'), {
       method: 'POST',
       headers: {
@@ -80,6 +124,8 @@ const Home = () => {
 
     if (!response.ok) {
       console.error(`Error Change Input: ${response.status}`);
+    } else {
+      setChosenInput(event.target.value);
     }
   };
 
@@ -96,6 +142,58 @@ const Home = () => {
     if (!response.ok) {
       console.error(`Error Change Device: ${response.status}`);
     }
+  };
+
+  const addLayer = async () => {
+    const response = await fetch(ip.concat('/addLayer'), {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      console.error(`Error Add Layer: ${response.status}`);
+    } else {
+      setNumLayers(numLayers + 1);
+    }
+  };
+
+  const deleteLayer = async () => {
+    const response = await fetch(ip.concat('/deleteLayer'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(layer),
+    });
+
+    if (!response.ok) {
+      console.error(`Error Delete Layer: ${response.status}`);
+    } else {
+      setNumLayers(numLayers - 1);
+      setLayer(0);
+    }
+  };
+
+  const changeLayerKey = async (event) => {
+    const response = await fetch(ip.concat('/changeLayerKey'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event.target.value),
+    });
+
+    if (!response.ok) {
+      console.error(`Error Change Layer Key: ${response.status}`);
+      return
+    }
+
+    const result = await response.json();
+    if (result.changed_settings.length > 0) {
+      setErrorSetting(result.changed_settings);
+    } else {
+      setErrorSetting(null);
+    }
+    setLayerKey(event.target.value);
   };
 
   return (
@@ -127,6 +225,50 @@ const Home = () => {
           </select>
         </form>
       </div>
+
+      <hr style={{ borderTopWidth: '3px' }} />
+
+      <p style={{ textAlign: 'center', fontSize: '25px' }}>Number of Layers: {numLayers}</p>
+      {numLayers < 3 ?
+        <button className="button" onClick={addLayer}>
+          Add Layer
+        </button>
+        : <button className="button" disabled>
+          Max Layers Reached
+        </button>}
+
+      <select value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+        {Array.from({ length: numLayers }, (_, i) => (
+          <option key={i} value={i}>
+            Layer {i}
+          </option>
+        ))}
+      </select>
+      {numLayers > 1 ?
+        <button className="button" onClick={deleteLayer}>
+          Delete Layer
+        </button>
+        : <button className="button" disabled>
+          Need 1 Layer
+        </button>
+      }
+
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <form>
+          <label style={{ fontSize: '25px' }}>Layer Key: </label>
+          <select name="layerKey" className="select" value={layerKey} onChange={changeLayerKey}>
+            <option value="">--None--</option>
+            {inputOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </form>
+      </div>
+
+      {errorSetting && errorSetting.map((s, index) => (
+        <p key={index} style={{ color: 'red', textAlign: 'center' }}>
+          Layer: {s[0]}, Setting {s[2]} in mode {s[1]} set to "N/A"</p>
+      ))}
 
       <hr style={{ borderTopWidth: '3px' }} />
 
@@ -181,9 +323,9 @@ const Home = () => {
         </div>
       ) :
         <div style={{ textAlign: 'center' }}>
-            <button className="button" disabled
-              style={{ marginBottom: '20px', marginTop: '20px' }}>Select device to upload.
-            </button>
+          <button className="button" disabled
+            style={{ marginBottom: '20px', marginTop: '20px' }}>Select device to upload.
+          </button>
         </div>
       }
 

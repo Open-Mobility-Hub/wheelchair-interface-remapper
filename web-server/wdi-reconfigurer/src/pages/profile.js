@@ -15,20 +15,22 @@
  */
 
 import React, { useState, useEffect, useContext } from 'react';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import { WDIContext, ip } from '../App';
 import ComboSelect from '../components/ComboSelect';
 
 import '../general.css';
 
 const Profile = () => {
-    const { chosenInput } = useContext(WDIContext);
+  const { chosenInput } = useContext(WDIContext);
   const [inputOptions, setInputOptions] = useState([]);
   const [profileSettings, setProfileSettings] = useState([]);
   const [errorSetting, setErrorSetting] = useState(null);
+  const [layer, setLayer] = useState(0);
+  const [numLayers, setNumLayers] = useState(0);
 
   useEffect(() => {
-    const getOptions = async (event) => {
+    const getOptions = async () => {
       const response = await fetch(ip.concat('/getOptions'), {
         method: 'POST',
         headers: {
@@ -45,28 +47,43 @@ const Profile = () => {
       setInputOptions(result);
     };
 
-    const getSettings = async (event) => {
-      const response = await fetch(ip.concat('/getProfileSettings'));
+    const getLayer = async () => {
+      const response = await fetch(ip.concat('/getLayers'));
 
       if (!response.ok) {
-        console.error(`Error Get Profile Settings: ${response.status}`);
+        console.error(`Error Get Layer: ${response.status}`);
       }
-
       const result = await response.json();
-      const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
-      setProfileSettings(settings);
+      setNumLayers(result.count);
     };
 
+    getLayer();
     getOptions();
-    getSettings();
   }, [chosenInput]);
+
+  useEffect(() => {
+    getSettings();
+    setErrorSetting(null);
+  }, [layer]);
+
+  const getSettings = async () => {
+    const response = await fetch(ip.concat(`/getProfileSettings?layer=${layer}`));
+
+    if (!response.ok) {
+      console.error(`Error Get Profile Settings: ${response.status}`);
+    }
+
+    const result = await response.json();
+    const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
+    setProfileSettings(settings);
+  };
 
   const changeSettings = async (event) => {
     setErrorSetting(null);
     const updatedSettings = [...profileSettings];
     for (let i = 0; i < updatedSettings.length; i++) {
       if (updatedSettings[i].setting === event.target.name) {
-        updatedSettings[i].value = event.target.value
+        updatedSettings[i].value = event.target.value;
       }
     }
     const response = await fetch(ip.concat('/changeSettings'), {
@@ -76,34 +93,44 @@ const Profile = () => {
       },
       body: JSON.stringify({
         mode: 'Profile',
+        layer: layer,
         setting: event.target.name,
-        value: event.target.value}),
+        value: event.target.value
+      }),
     });
-    if (!response.ok) {
-      if (response.status === 409) {
-        setErrorSetting([event.target.name, event.target.value]);
-      }
-      console.error(`Error Updating Profile Settings: ${response.status}`);
+    setProfileSettings(updatedSettings);
+
+    const result = await response.json();
+    if (result.changed_setting !== null) {
+      setErrorSetting([event.target.name, result.changed_setting]);
     } else {
-      setProfileSettings(updatedSettings)
+      setErrorSetting(null);
     }
   };
-
 
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>Profile Settings</h1>
 
+      <select value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+        {Array.from({ length: numLayers }, (_, i) => (
+          <option key={i} value={i}>
+            Layer {i}
+          </option>
+        ))}
+      </select>
+
       {profileSettings.map((s, index) => (
-        <div key={index} style={{marginBottom: '40px', display: 'grid'}}>
-          <label style={{ fontSize: '25px', fontWeight: 'bold'}}>{s.setting}</label>
+        <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
+          <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
           <ComboSelect
             name={s.setting}
             value={s.value}
             inputOptions={inputOptions}
             onChange={changeSettings}
           />
-          {errorSetting && errorSetting[0] === s.setting && <p style={{color: 'red'}}>{errorSetting[1]} is already in use.</p>}
+          {errorSetting && errorSetting[0] === s.setting && <p style={{ color: 'red' }}>
+            {errorSetting[1][1]} ({errorSetting[1][0]}) set to "N/A"</p>}
         </div>
       ))}
 

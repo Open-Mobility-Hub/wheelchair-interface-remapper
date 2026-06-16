@@ -59,13 +59,10 @@ class AppState():
                     ],
             'Sip-n-Puff': ["Soft Sip", "Hard Sip", "Soft Puff", "Hard Puff"]
         }
+        self.layer_key = None
         self.settings = {
             'Speed': None,
-            'Drive': None,
-            'Chair': None,
-            'Profile': None,
-            'Memory': None,
-            'Seating': None
+            'layers': []
         }
 
 def list_devices(state):

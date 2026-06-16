@@ -35,7 +35,14 @@ class Remapper(ABC):
 
         with open(self.settings_path, 'r') as f:
             self.remapping_dict = json.load(f)
+            self.layers = []
+            for l in self.remapping_dict['layers']:
+                self.layers.append({k: v for k, v in l.items() if k != "disabled"})
             self.input = self.remapping_dict["input"]
+            self.fwd_back_scale = self.state.settings['Speed']["Forward Backward Speed"]
+            self.left_right_scale = self.state.settings['Speed']["Left Right Speed"]
+            
+        self.layer = 0
         self.get_dicts()
 
     def __del__(self):

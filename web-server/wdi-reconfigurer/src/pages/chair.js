@@ -26,9 +26,11 @@ const Chair = () => {
   const [inputOptions, setInputOptions] = useState([]);
   const [chairSettings, setChairSettings] = useState([]);
   const [errorSetting, setErrorSetting] = useState(null);
+  const [layer, setLayer] = useState(0);
+  const [numLayers, setNumLayers] = useState(0);
 
   useEffect(() => {
-    const getOptions = async (event) => {
+    const getOptions = async () => {
       const response = await fetch(ip.concat('/getOptions'), {
         method: 'POST',
         headers: {
@@ -45,28 +47,43 @@ const Chair = () => {
       setInputOptions(result);
     };
 
-    const getSettings = async (event) => {
-      const response = await fetch(ip.concat('/getChairSettings'));
+    const getLayer = async () => {
+      const response = await fetch(ip.concat('/getLayers'));
 
       if (!response.ok) {
-        console.error(`Error Get Chair Settings: ${response.status}`);
+        console.error(`Error Get Layer: ${response.status}`);
       }
-
       const result = await response.json();
-      const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
-      setChairSettings(settings);
+      setNumLayers(result.count);
     };
 
+    getLayer();
     getOptions();
-    getSettings();
   }, [chosenInput]);
+
+  useEffect(() => {
+    getSettings();
+    setErrorSetting(null);
+  }, [layer]);
+
+  const getSettings = async () => {
+    const response = await fetch(ip.concat(`/getChairSettings?layer=${layer}`));
+
+    if (!response.ok) {
+      console.error(`Error Get Chair Settings: ${response.status}`);
+    }
+
+    const result = await response.json();
+    const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
+    setChairSettings(settings);
+  };
 
   const changeSettings = async (event) => {
     setErrorSetting(null);
     const updatedSettings = [...chairSettings];
     for (let i = 0; i < updatedSettings.length; i++) {
       if (updatedSettings[i].setting === event.target.name) {
-        updatedSettings[i].value = event.target.value
+        updatedSettings[i].value = event.target.value;
       }
     }
     const response = await fetch(ip.concat('/changeSettings'), {
@@ -76,24 +93,32 @@ const Chair = () => {
       },
       body: JSON.stringify({
         mode: 'Chair',
+        layer: layer,
         setting: event.target.name,
         value: event.target.value
       }),
     });
-    if (!response.ok) {
-      if (response.status === 409) {
-        setErrorSetting([event.target.name, event.target.value]);
-      }
-      console.error(`Error Updating Chair Settings: ${response.status}`);
+    setChairSettings(updatedSettings);
+
+    const result = await response.json();
+    if (result.changed_setting !== null) {
+      setErrorSetting([event.target.name, result.changed_setting]);
     } else {
-      setChairSettings(updatedSettings)
+      setErrorSetting(null);
     }
   };
-
 
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>Chair Settings</h1>
+
+      <select value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+        {Array.from({ length: numLayers }, (_, i) => (
+          <option key={i} value={i}>
+            Layer {i}
+          </option>
+        ))}
+      </select>
 
       {chairSettings.map((s, index) => (
         <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
@@ -104,7 +129,8 @@ const Chair = () => {
             inputOptions={inputOptions}
             onChange={changeSettings}
           />
-          {errorSetting && errorSetting[0] === s.setting && <p style={{color: 'red'}}>{errorSetting[1]} is already in use.</p>}
+          {errorSetting && errorSetting[0] === s.setting && <p style={{ color: 'red' }}>
+            {errorSetting[1][1]} ({errorSetting[1][0]}) set to "N/A"</p>}
         </div>
       ))}
 
