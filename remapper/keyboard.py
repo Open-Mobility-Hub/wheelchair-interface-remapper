@@ -33,7 +33,11 @@ class Keyboard(Remapper):
 
             actions = []
             consumed = set()
-            for mapping_key, wdi_action in self.remapping_dict.items():
+            if self.remapping_dict["layer_key"] in self.buttons:
+                self.layer = (self.layer + 1) % len(self.layers)
+                self.buttons.clear()
+
+            for mapping_key, wdi_action in self.layers[self.layer].items():
                 if "+" in mapping_key:
                     keys = mapping_key.split("+", 1)
                     if keys[0] in self.buttons and keys[1] in self.buttons:
@@ -41,7 +45,7 @@ class Keyboard(Remapper):
                         consumed.add(keys[0])
                         consumed.add(keys[1])
             
-            for mapping_key, wdi_action in self.remapping_dict.items():
+            for mapping_key, wdi_action in self.layers[self.layer].items():
                 if "+" not in mapping_key:
                     if mapping_key in self.buttons and mapping_key not in consumed:
                         actions.append(wdi_action)

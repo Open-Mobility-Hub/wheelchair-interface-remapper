@@ -27,6 +27,8 @@ const Drive = () => {
   const [speedSettings, setSpeedSettings] = useState([]);
   const [driveSettings, setDriveSettings] = useState([]);
   const [errorSetting, setErrorSetting] = useState(null);
+  const [layer, setLayer] = useState(0);
+  const [numLayers, setNumLayers] = useState(0);
 
   useEffect(() => {
     const getOptions = async (event) => {
@@ -46,21 +48,19 @@ const Drive = () => {
       setInputOptions(result);
     };
 
-    const getSettings = async (event) => {
-      const response = await fetch(ip.concat('/getDriveSettings'));
+    const getLayer = async (event) => {
+      const response = await fetch(ip.concat('/getLayers'));
 
       if (!response.ok) {
-        console.error(`Error Get Drive Settings: ${response.status}`);
+        console.error(`Error Get Layer: ${response.status}`);
       }
-
       const result = await response.json();
-      const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
-      setDriveSettings(settings);
+      setNumLayers(result.count);
     };
 
     const getSpeedSettings = async (event) => {
       const response = await fetch(ip.concat('/getSpeedSettings'));
-      
+
       if (!response.ok) {
         console.error(`Error Get Speed Settings: ${response.status}`);
       }
@@ -69,10 +69,28 @@ const Drive = () => {
       setSpeedSettings(settings);
     };
 
+    getLayer();
     getOptions();
-    getSettings();
     getSpeedSettings();
   }, [chosenInput]);
+
+  useEffect(() => {
+    getSettings();
+    setErrorSetting(null);
+  }
+    , [layer]);
+
+  const getSettings = async (event) => {
+    const response = await fetch(ip.concat(`/getDriveSettings?layer=${layer}`));
+
+    if (!response.ok) {
+      console.error(`Error Get Drive Settings: ${response.status}`);
+    }
+
+    const result = await response.json();
+    const settings = Object.keys(result).map(key => ({ setting: key, value: result[key] }));
+    setDriveSettings(settings);
+  };
 
   const changeSettings = async (event) => {
     setErrorSetting(null);
@@ -89,17 +107,18 @@ const Drive = () => {
       },
       body: JSON.stringify({
         mode: 'Drive',
+        layer: layer,
         setting: event.target.name,
         value: event.target.value
       }),
     });
-    if (!response.ok) {
-      if (response.status === 409) {
-        setErrorSetting([event.target.name, event.target.value]);
-      }
-      console.error(`Error Updating Drive Settings: ${response.status}`);
+    setDriveSettings(updatedSettings)
+
+    const result = await response.json();
+    if (result.changed_setting != null) {
+      setErrorSetting([event.target.name, result.changed_setting]);
     } else {
-      setDriveSettings(updatedSettings)
+      setErrorSetting(null);
     }
   };
 
@@ -111,21 +130,17 @@ const Drive = () => {
         updatedSettings[i].value = event.target.value
       }
     }
-    const response = await fetch(ip.concat('/changeSettings'), {
+    const response = await fetch(ip.concat('/changeSpeedSettings'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        mode: 'Speed',
         setting: event.target.name,
         value: parseInt(event.target.value)
       }),
     });
     if (!response.ok) {
-      if (response.status === 409) {
-        setErrorSetting([event.target.name, event.target.value]);
-      }
       console.error(`Error Updating Speed Settings: ${response.status}`);
     } else {
       setSpeedSettings(updatedSettings)
@@ -135,6 +150,14 @@ const Drive = () => {
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>Drive Settings</h1>
+
+      <select value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+        {Array.from({ length: numLayers }, (_, i) => (
+          <option key={i} value={i}>
+            Layer {i}
+          </option>
+        ))}
+      </select>
 
       {speedSettings.map((s, index) => (
         <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
@@ -147,10 +170,8 @@ const Drive = () => {
             max={100}
             onChange={changeSpeedSettings}>
           </input>
-          {errorSetting && errorSetting[0] === s.setting && <p style={{color: 'red'}}>Invalid speed setting.</p>}
         </div>
-       ))
-      }
+      ))}
 
       {driveSettings.map((s, index) => (
         <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
@@ -161,7 +182,8 @@ const Drive = () => {
             inputOptions={inputOptions}
             onChange={changeSettings}
           />
-          {errorSetting && errorSetting[0] === s.setting && <p style={{color: 'red'}}>{errorSetting[1]} is already in use.</p>}
+          {errorSetting && errorSetting[0] === s.setting && <p style={{ color: 'red' }}>
+            {errorSetting[1][1]} ({errorSetting[1][0]}) set to "N/A"</p>}
         </div>
       ))}
 

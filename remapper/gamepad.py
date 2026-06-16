@@ -49,6 +49,10 @@ class Gamepad(Remapper):
                             self.buttons.discard("DPAD_UP")
                             self.buttons.discard("DPAD_DOWN")
                     elif event.code in JOYSTICK_AXES:
+                        if self.axes_locked[event.code]:
+                            if event.value == 0:
+                                self.axes_locked[event.code] = False
+                            continue
                         pos, neg = JOYSTICK_AXES[event.code]
                         if event.value > 0:
                             self.buttons.add(pos)
@@ -72,14 +76,20 @@ class Gamepad(Remapper):
             consumed = set()
             self.fb = 0
             self.lr = 0
-            for mapping_key, wdi_action in self.remapping_dict.items():
+
+            if self.remapping_dict["layer_key"] in self.buttons:
+                self.layer = (self.layer + 1) % len(self.layers)
+                self.buttons.clear()
+                self.axes_locked = {axis: True for axis in self.axes_locked}
+
+            for mapping_key, wdi_action in self.layers[self.layer].items():
                 if "+" in mapping_key:
                     keys = mapping_key.split("+", 1)
                     if keys[0] in self.buttons and keys[1] in self.buttons:
                         actions.append(wdi_action)
                         consumed.add(keys[0])
                         consumed.add(keys[1])
-            for mapping_key, wdi_action in self.remapping_dict.items():
+            for mapping_key, wdi_action in self.layers[self.layer].items():
                 if "+" not in mapping_key:
                     if mapping_key in self.buttons and mapping_key not in consumed:
                         if wdi_action in drive_map:
@@ -101,6 +111,12 @@ class Gamepad(Remapper):
 
         self.axis_values = {}
 
+        self.axes_locked = {
+            evdev.ecodes.ABS_X: False,
+            evdev.ecodes.ABS_Y: False,
+            evdev.ecodes.ABS_RX: False,
+            evdev.ecodes.ABS_RY: False,
+        }
         self.abs_max = {}
         self.abs_min = {}
         for axis in JOYSTICK_AXES:
