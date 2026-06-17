@@ -18,7 +18,7 @@ const ComboSelect = ({ value, name, inputOptions, onChange }) => {
     };
 
     return (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className="combo-select">
             <select
                 className="select"
                 value={modifier}
@@ -29,7 +29,7 @@ const ComboSelect = ({ value, name, inputOptions, onChange }) => {
                     <option key={opt} value={opt}>{opt}</option>
                 ))}
             </select>
-            {modifier && <span>+</span>}
+            <span>+</span>
             <select
                 className="select"
                 value={key}

@@ -31,6 +31,8 @@ const Home = () => {
   const [inputOptions, setInputOptions] = useState([]);
   const [errorSetting, setErrorSetting] = useState(null);
 
+  useEffect(() => { document.title = "Wheelchair Interface Remapper"; }, []);
+
   useEffect(() => {
     const getInputs = async () => {
       const response = await fetch(ip.concat('/getInputs'));
@@ -198,39 +200,35 @@ const Home = () => {
 
   return (
     <div>
-      <h1 style={{ textAlign: 'center' }}>Wheelchair Interface Remapper</h1>
+      <h1 className="page">Wheelchair Interface Remapper</h1>
 
-      <div style={{ textAlign: 'center' }}>
-        <form>
-          <label style={{ fontSize: '25px' }}>Chosen Input: </label>
-          <select name="input" className="select" value={chosenInput} onChange={changeInput}>
-            {inputs.map((option) => (
-              <option key={option.type} value={option.type}>
-                {option.type}
-              </option>
-            ))}
-          </select>
-        </form>
+      <div className="page">
+        <label className="form-label">Chosen Input: </label>
+        <select name="input" className="select" value={chosenInput} onChange={changeInput}>
+          {inputs.map((option) => (
+            <option key={option.type} value={option.type}>
+              {option.type}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <form>
-          <label style={{ fontSize: '25px' }}>Input Device: </label>
-          <select name="device" className="select" value={inputDevice} onChange={changeDevice}>
-            <option value="">NONE</option>
-            {devices.map((option) => (
-              <option key={option[1]} value={option[1]}>
-                {option[0]}
-              </option>
-            ))}
-          </select>
-        </form>
+      <div className="section">
+        <label className="form-label">Input Device: </label>
+        <select name="device" className="select" value={inputDevice} onChange={changeDevice}>
+          <option value="">NONE</option>
+          {devices.map((option) => (
+            <option key={option[1]} value={option[1]}>
+              {option[0]}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <hr style={{ borderTopWidth: '3px' }} />
+      <hr className="divider" />
 
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <p style={{ textAlign: 'center', fontSize: '25px' }}>Number of Layers: {numLayers}</p>
+      <div className="section">
+        <p className="form-label">Number of Layers: {numLayers}</p>
         {numLayers < 3 ?
           <button className="button" onClick={addLayer}>
             Add Layer
@@ -258,76 +256,46 @@ const Home = () => {
         }
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <form>
-          <label style={{ fontSize: '25px' }}>Layer Key: </label>
-          <select name="layerKey" className="select" value={layerKey} onChange={changeLayerKey}>
-            <option value="">--None--</option>
-            {inputOptions.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        </form>
+      <div className="section">
+        <label className="form-label">Layer Key: </label>
+        <select name="layerKey" className="select" value={layerKey} onChange={changeLayerKey}>
+          <option value="">--None--</option>
+          {inputOptions.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
       </div>
 
       {errorSetting && errorSetting.map((s, index) => (
         <p key={index} style={{ color: 'red', textAlign: 'center' }}>
-          Layer: {s[0]}, Setting {s[2]} in mode {s[1]} set to "N/A"</p>
+          Layer {s[0]} - {s[2]} ({s[1]}) cleared.</p>
       ))}
 
-      <hr style={{ borderTopWidth: '3px' }} />
+      <hr className="divider" />
 
       {chosenInput !== 'Sip-n-Puff' ?
         (
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
-            <Link to="/drive">
-              <button className="button"
-                style={{ marginBottom: '20px', marginTop: '10px' }}>Drive Settings
-              </button>
-            </Link>
-            <Link to="/chair">
-              <button className="button"
-                style={{ marginBottom: '20px' }}>Chair Settings
-              </button>
-            </Link>
-            <Link to="/profile">
-              <button className="button"
-                style={{ marginBottom: '20px' }}>Profile Settings
-              </button>
-            </Link>
-            <Link to="/memory">
-              <button className="button"
-                style={{ marginBottom: '20px' }}>Memory Settings
-              </button>
-            </Link>
-            <Link to="/seating">
-              <button className="button"
-                style={{ marginBottom: '10px' }}>Seating Settings
-              </button>
-            </Link>
+          <div className="nav-column">
+            <Link to="/drive" className="button" style={{ marginBottom: '20px', marginTop: '10px' }}>Drive Settings</Link>
+            <Link to="/chair" className="button" style={{ marginBottom: '20px' }}>Chair Settings</Link>
+            <Link to="/profile" className="button" style={{ marginBottom: '20px' }}>Profile Settings</Link>
+            <Link to="/memory" className="button" style={{ marginBottom: '20px' }}>Memory Settings</Link>
+            <Link to="/seating" className="button" style={{ marginBottom: '10px' }}>Seating Settings</Link>
           </div>
         ) :
-        (<div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
-          <Link to="/snp">
-            <button className="button"
-              style={{ marginBottom: '10px', marginTop: '10px' }}>SNP Settings
-            </button>
-          </Link>
+        (<div className="nav-column">
+          <Link to="/snp" className="button" style={{ marginBottom: '10px', marginTop: '10px' }}>SNP Settings</Link>
         </div>
         )}
 
-      <hr style={{ borderTopWidth: '3px' }} />
+      <hr className="divider" />
 
       {inputDevice ? (
-        <div style={{ textAlign: 'center' }}>
-          <Link to="/upload">
-            <button className="button"
-              style={{ marginBottom: '20px', marginTop: '20px' }}>Upload Settings
-            </button>
-          </Link>
+        <div className="page">
+          <Link to="/upload" className="button" style={{ marginBottom: '20px', marginTop: '20px' }}>Upload Settings</Link>
         </div>
       ) :
-        <div style={{ textAlign: 'center' }}>
+        <div className="page">
           <button className="button" disabled
             style={{ marginBottom: '20px', marginTop: '20px' }}>Select device to upload.
           </button>

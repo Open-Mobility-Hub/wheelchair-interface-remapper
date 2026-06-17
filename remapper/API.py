@@ -47,6 +47,14 @@ def make_default_layer(input):
             "Memory": None,
             "Seating": None
         }
+    else:
+        return {
+            "Drive": None,
+            "Chair": None,
+            "Profile": None,
+            "Memory": None,
+            "Seating": None
+        }
 
 def load_state_from_settings(state, settings_path):
     with open(settings_path, "r") as f:
