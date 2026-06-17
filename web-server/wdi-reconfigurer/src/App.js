@@ -26,7 +26,6 @@ import Profile from "./pages/profile";
 import Memory from "./pages/memory";
 import Seating from "./pages/seating";
 import Upload from "./pages/upload";
-import SNP from './pages/snp';
 
 export const WDIContext = createContext();
 export const ip = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -46,7 +45,6 @@ function App() {
           <Route path='/memory' element={<Memory />}></Route>
           <Route path='/seating' element={<Seating />}></Route>
           <Route path='/upload' element={<Upload />}></Route>
-          <Route path='/snp' element={<SNP/>}></Route>
         </Routes>
       </Router>
     </WDIContext.Provider>

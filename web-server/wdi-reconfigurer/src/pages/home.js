@@ -272,21 +272,14 @@ const Home = () => {
       ))}
 
       <hr className="divider" />
+      <div className="nav-column">
+        <Link to="/drive" className="button" style={{ marginBottom: '20px', marginTop: '10px' }}>Drive Settings</Link>
+        <Link to="/chair" className="button" style={{ marginBottom: '20px' }}>Chair Settings</Link>
+        <Link to="/profile" className="button" style={{ marginBottom: '20px' }}>Profile Settings</Link>
+        <Link to="/memory" className="button" style={{ marginBottom: '20px' }}>Memory Settings</Link>
+        <Link to="/seating" className="button" style={{ marginBottom: '10px' }}>Seating Settings</Link>
+      </div>
 
-      {chosenInput !== 'Sip-n-Puff' ?
-        (
-          <div className="nav-column">
-            <Link to="/drive" className="button" style={{ marginBottom: '20px', marginTop: '10px' }}>Drive Settings</Link>
-            <Link to="/chair" className="button" style={{ marginBottom: '20px' }}>Chair Settings</Link>
-            <Link to="/profile" className="button" style={{ marginBottom: '20px' }}>Profile Settings</Link>
-            <Link to="/memory" className="button" style={{ marginBottom: '20px' }}>Memory Settings</Link>
-            <Link to="/seating" className="button" style={{ marginBottom: '10px' }}>Seating Settings</Link>
-          </div>
-        ) :
-        (<div className="nav-column">
-          <Link to="/snp" className="button" style={{ marginBottom: '10px', marginTop: '10px' }}>SNP Settings</Link>
-        </div>
-        )}
 
       <hr className="divider" />
 
