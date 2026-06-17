@@ -19,7 +19,6 @@ import json
 
 from remapper import Remapper
 from keyboard import *
-from touchpad import *
 from gamepad import *
 from wdi_report import *
 
@@ -32,8 +31,7 @@ class AppState():
         self.devices = []
         self.inputs = {'NONE': 1,
                        'Keyboard': 0,
-                       'GP': 0,
-                       'Sip-n-Puff': 0}
+                       'GP': 0}
 
         self.input_options = {
             'NONE': [],
@@ -57,8 +55,7 @@ class AppState():
                    "BTN_TRIGGER_HAPPY5", "BTN_TRIGGER_HAPPY6", "BTN_TRIGGER_HAPPY7", "BTN_TRIGGER_HAPPY8",
                    "BTN_TRIGGER_HAPPY9", "BTN_TRIGGER_HAPPY10", "BTN_TRIGGER_HAPPY11", "BTN_TRIGGER_HAPPY12",
                    "BTN_TRIGGER_HAPPY13", "BTN_TRIGGER_HAPPY14", "BTN_TRIGGER_HAPPY15", "BTN_TRIGGER_HAPPY16",
-                   ],
-            'Sip-n-Puff': ["N/A", "Soft Sip", "Hard Sip", "Soft Puff", "Hard Puff"]
+                   ]
         }
         self.layer_key = None
         self.settings = {
@@ -99,8 +96,6 @@ def make_remapper(device_id, state, settings_path):
         return Keyboard(device_id, state, settings_path)
     elif input == "GP":
         return Gamepad(device_id, state, settings_path)
-    elif input == "Sip-n-Puff":
-        return Touchpad(device_id, state, settings_path)
     else:
         raise ValueError("Invalid input type")
 
