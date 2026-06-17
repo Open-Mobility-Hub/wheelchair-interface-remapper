@@ -65,7 +65,7 @@ const Memory = () => {
 
   useEffect(() => {
     const getSettings = async () => {
-      const response = await fetch(ip.concat(`/getMemorySettings?layer=${layer}`));
+      const response = await fetch(ip.concat(`/getSettings?mode=Memory&layer=${layer}`));
 
       if (!response.ok) {
         console.error(`Error Get Memory Settings: ${response.status}`);

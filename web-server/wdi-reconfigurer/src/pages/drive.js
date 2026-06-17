@@ -78,7 +78,7 @@ const Drive = () => {
 
   useEffect(() => {
     const getSettings = async () => {
-      const response = await fetch(ip.concat(`/getDriveSettings?layer=${layer}`));
+      const response = await fetch(ip.concat(`/getSettings?mode=Drive&layer=${layer}`));
 
       if (!response.ok) {
         console.error(`Error Get Drive Settings: ${response.status}`);

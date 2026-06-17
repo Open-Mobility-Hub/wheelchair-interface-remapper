@@ -2,8 +2,8 @@
 
 The Wheelchair Interface Remapper lets people drive and control a powered
 wheelchair through alternative input devices. It reads input from a standard
-HID device — a **keyboard**, a **gamepad/joystick**, or a **sip-and-puff**
-sensor — and translates it into the HID control reports that a wheelchair
+HID device — a **keyboard** or a **gamepad/joystick** — and translates it into
+the HID control reports that a wheelchair
 controller expects. A web UI lets a clinician or caregiver remap which input
 maps to which wheelchair action without touching code.
 
@@ -22,13 +22,11 @@ they need.
 | --- | --- |
 | [`remapper/`](remapper/) | Python core. Reads the input device, applies the active mapping, and writes wheelchair HID reports. Also hosts the Flask configuration API. Entry point: [`remapper/main.py`](remapper/main.py). |
 | [`web-server/wdi-reconfigurer/`](web-server/wdi-reconfigurer/) | React single-page app for editing the input-to-action mappings. |
-| [`ros_remapper/`](ros_remapper/) | ROS 2 (ament_python) package with sip-and-puff nodes (`snp`, `snp-combo`). **Depends on the proprietary `luci_messages` package** — see [ROS 2 components](#ros-2-components-optional). |
-| [`awl_core_msgs/`](awl_core_msgs/) | ROS 2 service definitions (`GetParam`, `UpdateParam`) used by the ROS nodes. |
 
 ## How it works
 
 ```
-  Input device (keyboard / gamepad / sip-and-puff)
+  Input device (keyboard / gamepad)
         │  (Linux evdev: /dev/input/eventN)
         ▼
   remapper/main.py ── applies the active mapping from settings.json
@@ -55,9 +53,8 @@ they need.
 ## Supported inputs
 
 - **Keyboard** — keys mapped to discrete actions (drive directions, lights,
-  seating, speed, etc.).
-- **Gamepad / joystick** — buttons and analog axes.
-- **Sip-and-puff** — soft/hard sip and puff thresholds mapped to drive commands.
+  seating, speed, etc.). Supports up to 3 layers and combo bindings (two keys held simultaneously).
+- **Gamepad / joystick** — buttons and analog axes. Supports up to 3 layers and combo bindings.
 
 ## Getting started
 
@@ -88,9 +85,8 @@ export REMAPPER_CORS_ORIGINS="http://localhost:3000"
 python main.py
 ```
 
-On start it lists detected input devices and prompts for a device ID (the `N`
-in `/dev/input/eventN`). The Flask configuration API then listens on
-`REMAPPER_HOST:REMAPPER_PORT`.
+The remapper auto-detects connected input devices. Use the web UI to select the
+active device and input type.
 
 ### 2. Run the web configuration UI
 
@@ -117,29 +113,35 @@ picks up the new `settings.json` and resumes driving.
 | `REMAPPER_CORS_ORIGINS` | remapper API | `http://localhost:3000` | Comma-separated allowed CORS origins. |
 | `REACT_APP_API_URL` | web UI | `http://localhost:5000` | Base URL of the remapper API. |
 
-## ROS 2 components (optional)
-
-The [`ros_remapper/`](ros_remapper/) package provides sip-and-puff nodes for a
-ROS 2 environment, with service definitions in
-[`awl_core_msgs/`](awl_core_msgs/).
-
-> **Important:** `ros_remapper` depends on **`luci_messages`**, a
-> package that is **not** included in this repository. It is available through
-> https://github.com/lucimobility/luci-ros2-sdk.
-
-```bash
-# In a ROS 2 workspace with luci_messages available:
-colcon build --packages-select awl_core_msgs ros_remapper
-# Entry points: snp, snp-combo
-```
-
 ## Hardware
 
 The remapper is built to run on a single-board computer (developed on an Orange
 Pi) operating as a **USB HID gadget**. The board reads the chosen input device
-via `evdev` and presents itself to the wheelchair controller as a HID device by
-writing reports to `/dev/hidg0`. Configuring USB gadget mode and the wheelchair
-controller wiring is outside the scope of this repository.
+via `evdev` and presents itself to the wheelchair controller as a HID device.
+
+### USB gadget setup
+
+The remapper writes HID reports to `/dev/hidg0`, created by `gadget/configfs.sh` using
+the Linux USB gadget framework (ConfigFS + `libcomposite`). Run `gadget/configfs.sh`
+as root on each boot before starting `main.py`.
+
+**One-time system configuration (OrangePi)**
+
+Add to `/boot/orangepiEnv.txt`:
+```
+dtoverlay=dwc2
+```
+
+Add to `/etc/modules`:
+```
+dwc2
+libcomposite
+```
+
+Reboot after making these changes. The script requires root and must be run on
+every boot. How you invoke it depends on your setup (e.g. `@reboot` in crontab,
+a systemd unit, or manually). After a successful run, `/dev/hidg0` should exist.
+If it does not appear, check `dmesg` for gadget or UDC errors.
 
 ## Contributing
 

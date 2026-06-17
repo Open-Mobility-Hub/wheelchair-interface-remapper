@@ -46,8 +46,6 @@ hardware, but please test on real hardware before changing driving behavior.
 ## Tests / checks
 
 - Web UI: `npm test` and `npm run build` in `web-server/wdi-reconfigurer/`.
-- ROS package (requires a ROS 2 environment and the proprietary `luci_messages`
-  dependency): the `ament_*` lint tests run as part of `colcon test`.
 
 ## Licensing of contributions
 

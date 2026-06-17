@@ -20,8 +20,6 @@ import json
 
 from interface_dicts.KB_dicts import *
 from interface_dicts.GP_dicts import *
-from interface_dicts.SNP_dicts import *
-
 def make_default_layer(input):
     if input == "Keyboard":
         return {
@@ -38,14 +36,6 @@ def make_default_layer(input):
             "Profile": GP_Profile_settings.copy(),
             "Memory": GP_Memory_settings.copy(),
             "Seating": GP_Seating_settings.copy()
-        }
-    elif input == "Sip-n-Puff":
-        return {
-            "Drive": SNP_Drive_settings.copy(),
-            "Chair": None,
-            "Profile": None,
-            "Memory": None,
-            "Seating": None
         }
     else:
         return {
@@ -85,8 +75,6 @@ def load_state_from_settings(state, settings_path):
         state.settings['Speed'] = KB_Speed_settings.copy()
     elif active_input == "GP":
         state.settings['Speed'] = GP_Speed_settings.copy()
-    elif active_input == "Sip-n-Puff":
-        state.settings['Speed'] = SNP_Speed_settings.copy()
 
     for key in state.settings['Speed'].keys():
         if key in data:
@@ -147,10 +135,6 @@ def create_app(state, settings_path):
             state.layer_key = None
             state.settings['Speed'] = GP_Speed_settings.copy()
             state.settings['layers'] = [make_default_layer("GP")]
-        elif input == "Sip-n-Puff":
-            state.layer_key = None
-            state.settings['Speed'] = SNP_Speed_settings.copy()
-            state.settings['layers'] = [make_default_layer("Sip-n-Puff")]
 
         for key in state.inputs.keys():
             if key == input:
@@ -158,51 +142,24 @@ def create_app(state, settings_path):
             else:
                 state.inputs[key] = 0
 
-        print(f"Input changed to {input}")
         return jsonify({'message': 'Input updated successfully'}), 200
 
     @app.route("/getOptions", methods=['POST'])
     def get_options():
-        print(f"The request is {request.get_json()}")
         options = state.input_options[request.get_json()]
         response = jsonify(options)
         return response
 
-    # all of these functions below can be generalized
     @app.route("/getSpeedSettings")
     def get_speed_settings():
         response = jsonify(state.settings['Speed'])
         return response
 
-    @app.route("/getDriveSettings")
-    def get_drive_settings():
+    @app.route("/getSettings")
+    def get_settings():
+        mode = request.args.get('mode')
         layer = int(request.args.get('layer', 0))
-        response = jsonify(state.settings['layers'][layer]['Drive'])
-        return response
-
-    @app.route("/getChairSettings")
-    def get_chair_settings():
-        layer = int(request.args.get('layer', 0))
-        response = jsonify(state.settings['layers'][layer]['Chair'])
-        return response
-
-    @app.route("/getProfileSettings")
-    def get_profile_settings():
-        layer = int(request.args.get('layer', 0))
-        response = jsonify(state.settings['layers'][layer]['Profile'])
-        return response
-
-    @app.route("/getMemorySettings")
-    def get_memory_settings():
-        layer = int(request.args.get('layer', 0))
-        response = jsonify(state.settings['layers'][layer]['Memory'])
-        return response
-
-    @app.route("/getSeatingSettings")
-    def get_seating_settings():
-        layer = int(request.args.get('layer', 0))
-        response = jsonify(state.settings['layers'][layer]['Seating'])
-        return response
+        return jsonify(state.settings['layers'][layer][mode])
 
     @app.route("/changeSettings", methods=['POST'])
     def change_settings():
@@ -294,32 +251,23 @@ def create_app(state, settings_path):
         input_dict = {"input": chosen_input}
         selected_device = {"device": d[0] for d in state.devices if d[2] == 1}
 
-        # TODO: SNP upload broken — state.settings['Drive'] removed with layer refactor, fix in SNP rework
-        if chosen_input == "Sip-n-Puff":
-            for key in SNP_Drive_settings.keys():
-                SNP_Drive_settings[key] = int(SNP_Drive_settings[key])
-            settings_dictionary = {
-                **input_dict,
-                **state.settings['Drive']
-            }
-        else:
-            layers_list = []
-            for l in state.settings['layers']:
-                combined_settings = {k: v for key, d in l.items() if d is not None for k, v in d.items()}
-                reversed_settings = {v: k for k, v in combined_settings.items() if v != "N/A"}
-                disabled = [k for k, v in combined_settings.items() if v == "N/A"]
-                layers_list.append({
-                    **reversed_settings,
-                    "disabled": disabled
-                })
-            
-            settings_dictionary = {
-                **input_dict,
-                **selected_device,
-                "layer_key": state.layer_key,
-                **state.settings['Speed'],
-                "layers": layers_list
-            }
+        layers_list = []
+        for l in state.settings['layers']:
+            combined_settings = {k: v for key, d in l.items() if d is not None for k, v in d.items()}
+            reversed_settings = {v: k for k, v in combined_settings.items() if v != "N/A"}
+            disabled = [k for k, v in combined_settings.items() if v == "N/A"]
+            layers_list.append({
+                **reversed_settings,
+                "disabled": disabled
+            })
+        
+        settings_dictionary = {
+            **input_dict,
+            **selected_device,
+            "layer_key": state.layer_key,
+            **state.settings['Speed'],
+            "layers": layers_list
+        }
 
         with open(settings_path, "w") as outfile:
             json.dump(

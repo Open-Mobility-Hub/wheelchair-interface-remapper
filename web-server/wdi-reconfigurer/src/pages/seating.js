@@ -65,7 +65,7 @@ const Seating = () => {
 
   useEffect(() => {
     const getSettings = async () => {
-      const response = await fetch(ip.concat(`/getSeatingSettings?layer=${layer}`));
+      const response = await fetch(ip.concat(`/getSettings?mode=Seating&layer=${layer}`));
 
       if (!response.ok) {
         console.error(`Error Get Seating Settings: ${response.status}`);

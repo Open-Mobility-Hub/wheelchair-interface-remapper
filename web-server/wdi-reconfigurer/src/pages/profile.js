@@ -65,7 +65,7 @@ const Profile = () => {
 
   useEffect(() => {
     const getSettings = async () => {
-      const response = await fetch(ip.concat(`/getProfileSettings?layer=${layer}`));
+      const response = await fetch(ip.concat(`/getSettings?mode=Profile&layer=${layer}`));
 
       if (!response.ok) {
         console.error(`Error Get Profile Settings: ${response.status}`);
