@@ -5,8 +5,7 @@
   color: #121212;
   cursor: pointer;
   display: inline-flex;
-  flex: 1 1 auto;
-  font-family: Inter,sans-serif;
+  flex: 0 0 auto;
   font-size: 1.2rem;
   font-weight: 700;
   justify-content: center;
@@ -18,7 +17,14 @@
   text-decoration: none;
   white-space: nowrap;
   border: 0;
+  background-color: #f2f2f2;
+  align-self: center;
   }
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .select {
   align-items: center;
@@ -28,8 +34,7 @@
   cursor: pointer;
   display: inline-flex;
   flex: 1 1 auto;
-  font-family: Inter,sans-serif;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 700;
   justify-content: center;
   line-height: 1;
@@ -53,6 +58,44 @@
   }
 }
 
+.page {
+  text-align: center;
+}
+
+.settings-row {
+  margin-bottom: 40px;
+  display: grid;
+}
+
+.settings-label {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.section {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.form-label {
+  font-size: 25px;
+}
+
+.nav-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.divider {
+  border-top-width: 3px;
+}
+
+.combo-select {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .number-input {
   -webkit-appearance: none;
   -moz-appearance: textfield;
@@ -64,8 +107,7 @@
   cursor: text;
   display: inline-flex;
   flex: 1 1 auto;
-  font-family: Inter, sans-serif;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 700;
   justify-content: center;
   line-height: 1;

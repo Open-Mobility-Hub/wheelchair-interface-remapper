@@ -25,6 +25,7 @@ from wdi_report import *
 
 from API import create_app, load_state_from_settings
 
+
 class AppState():
     def __init__(self):
         self.STATE = 1
@@ -48,22 +49,29 @@ class AppState():
                 'left shift', 'right shift', 'left ctrl', 'right ctrl', 'left alt', 'right alt', 'left meta', 'right meta'
             ],
             'GP': ['N/A', 'BTN_C', 'BTN_NORTH', 'BTN_SOUTH', 'BTN_EAST', 'BTN_WEST', "BTN_START", "BTN_SELECT", "BTN_MODE",
-                    "BTN_TL", "BTN_TR", "BTN_TL2", "BTN_TR2",
-                    "POS_ABS_X", "POS_ABS_Y", "POS_ABS_RX", "POS_ABS_RY",
-                    "NEG_ABS_X", "NEG_ABS_Y", "NEG_ABS_RX", "NEG_ABS_RY",
-                    "DPAD_UP", "DPAD_DOWN", "DPAD_LEFT", "DPAD_RIGHT", "BTN_THUMBL", "BTN_THUMBR",
-                    "BTN_TRIGGER_HAPPY1", "BTN_TRIGGER_HAPPY2", "BTN_TRIGGER_HAPPY3", "BTN_TRIGGER_HAPPY4",
-                    "BTN_TRIGGER_HAPPY5", "BTN_TRIGGER_HAPPY6", "BTN_TRIGGER_HAPPY7", "BTN_TRIGGER_HAPPY8",
-                    "BTN_TRIGGER_HAPPY9", "BTN_TRIGGER_HAPPY10", "BTN_TRIGGER_HAPPY11", "BTN_TRIGGER_HAPPY12",
-                    "BTN_TRIGGER_HAPPY13", "BTN_TRIGGER_HAPPY14", "BTN_TRIGGER_HAPPY15", "BTN_TRIGGER_HAPPY16",
-                    ],
+                   "BTN_TL", "BTN_TR", "BTN_TL2", "BTN_TR2",
+                   "POS_ABS_X", "POS_ABS_Y", "POS_ABS_RX", "POS_ABS_RY",
+                   "NEG_ABS_X", "NEG_ABS_Y", "NEG_ABS_RX", "NEG_ABS_RY",
+                   "DPAD_UP", "DPAD_DOWN", "DPAD_LEFT", "DPAD_RIGHT", "BTN_THUMBL", "BTN_THUMBR",
+                   "BTN_TRIGGER_HAPPY1", "BTN_TRIGGER_HAPPY2", "BTN_TRIGGER_HAPPY3", "BTN_TRIGGER_HAPPY4",
+                   "BTN_TRIGGER_HAPPY5", "BTN_TRIGGER_HAPPY6", "BTN_TRIGGER_HAPPY7", "BTN_TRIGGER_HAPPY8",
+                   "BTN_TRIGGER_HAPPY9", "BTN_TRIGGER_HAPPY10", "BTN_TRIGGER_HAPPY11", "BTN_TRIGGER_HAPPY12",
+                   "BTN_TRIGGER_HAPPY13", "BTN_TRIGGER_HAPPY14", "BTN_TRIGGER_HAPPY15", "BTN_TRIGGER_HAPPY16",
+                   ],
             'Sip-n-Puff': ["N/A", "Soft Sip", "Hard Sip", "Soft Puff", "Hard Puff"]
         }
         self.layer_key = None
         self.settings = {
             'Speed': None,
-            'layers': []
+            'layers': [{
+                "Drive": None,
+                "Chair": None,
+                "Profile": None,
+                "Memory": None,
+                "Seating": None
+            }]
         }
+
 
 def list_devices(state):
     state.devices = []
@@ -71,6 +79,7 @@ def list_devices(state):
         d = evdev.InputDevice(path)
         state.devices.append([d.name, d.path, 0])
         d.close()
+
 
 def create_remapper(state, settings_path):
     device = None
@@ -83,6 +92,7 @@ def create_remapper(state, settings_path):
     else:
         raise ValueError("No active device found")
 
+
 def make_remapper(device_id, state, settings_path):
     input = [k for k, v in state.inputs.items() if v == 1][0]
     if input == "Keyboard":
@@ -93,7 +103,8 @@ def make_remapper(device_id, state, settings_path):
         return Touchpad(device_id, state, settings_path)
     else:
         raise ValueError("Invalid input type")
-    
+
+
 if __name__ == "__main__":
     state = AppState()
     list_devices(state)
@@ -141,10 +152,12 @@ if __name__ == "__main__":
         else:
             if r.current_STATE == 1 and STATE == 0:
                 print("RUNNING --> CONFIGURING")
-                r.write_report(get_wdi_report(0, 0, ["Disable Device Control"]))
+                r.write_report(get_wdi_report(
+                    0, 0, ["Disable Device Control"]))
                 r.write_report(get_wdi_report(0, 0, []))
 
-                selected_device = next((d for d in state.devices if d[2] == 1), None)
+                selected_device = next(
+                    (d for d in state.devices if d[2] == 1), None)
                 if selected_device is None:
                     selected_device = ['No Device Selected', '', 0]
                 list_devices(state)

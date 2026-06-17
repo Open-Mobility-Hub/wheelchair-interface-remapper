@@ -29,6 +29,8 @@ const Chair = () => {
   const [layer, setLayer] = useState(0);
   const [numLayers, setNumLayers] = useState(0);
 
+  useEffect(() => { document.title = "Chair Settings | WIR"; }, []);
+
   useEffect(() => {
     const getOptions = async () => {
       const response = await fetch(ip.concat('/getOptions'), {
@@ -121,10 +123,10 @@ const Chair = () => {
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="page">
       <h1>Chair Settings</h1>
 
-      <select className= "select" value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+      <select className= "select" value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ marginBottom: '40px' }}>
         {Array.from({ length: numLayers }, (_, i) => (
           <option key={i} value={i}>
             Layer {i + 1}
@@ -133,8 +135,8 @@ const Chair = () => {
       </select>
 
       {chairSettings.map((s, index) => (
-        <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
-          <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
+        <div key={index} className="settings-row">
+          <label className="settings-label">{s.setting}</label>
           <ComboSelect
             name={s.setting}
             value={s.value}
@@ -149,9 +151,7 @@ const Chair = () => {
         </div>
       ))}
 
-      <Link to="/">
-        <button className='button'>Home</button>
-      </Link>
+      <Link to="/" className="button">Home</Link>
     </div>
   );
 };

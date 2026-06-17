@@ -30,8 +30,10 @@ const Drive = () => {
   const [layer, setLayer] = useState(0);
   const [numLayers, setNumLayers] = useState(0);
 
+  useEffect(() => { document.title = "Drive Settings | WIR"; }, []);
+
   useEffect(() => {
-    const getOptions = async (event) => {
+    const getOptions = async () => {
       const response = await fetch(ip.concat('/getOptions'), {
         method: 'POST',
         headers: {
@@ -48,7 +50,7 @@ const Drive = () => {
       setInputOptions(result);
     };
 
-    const getLayer = async (event) => {
+    const getLayer = async () => {
       const response = await fetch(ip.concat('/getLayers'));
 
       if (!response.ok) {
@@ -58,7 +60,7 @@ const Drive = () => {
       setNumLayers(result.count);
     };
 
-    const getSpeedSettings = async (event) => {
+    const getSpeedSettings = async () => {
       const response = await fetch(ip.concat('/getSpeedSettings'));
 
       if (!response.ok) {
@@ -75,7 +77,7 @@ const Drive = () => {
   }, [chosenInput]);
 
   useEffect(() => {
-    const getSettings = async (event) => {
+    const getSettings = async () => {
       const response = await fetch(ip.concat(`/getDriveSettings?layer=${layer}`));
 
       if (!response.ok) {
@@ -158,10 +160,10 @@ const Drive = () => {
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="page">
       <h1>Drive Settings</h1>
 
-      <select className="select" value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ fontSize: '20px', marginBottom: '40px' }}>
+      <select className="select" value={layer} onChange={(e) => setLayer(parseInt(e.target.value))} style={{ marginBottom: '40px' }}>
         {Array.from({ length: numLayers }, (_, i) => (
           <option key={i} value={i}>
             Layer {i + 1}
@@ -170,10 +172,11 @@ const Drive = () => {
       </select>
 
       {speedSettings.map((s, index) => (
-        <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
-          <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
+        <div key={index} className="settings-row">
+          <label className="settings-label">{s.setting}</label>
           <input
             type="number"
+            className="number-input"
             name={s.setting}
             value={s.value}
             min={0}
@@ -184,8 +187,8 @@ const Drive = () => {
       ))}
 
       {driveSettings.map((s, index) => (
-        <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
-          <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
+        <div key={index} className="settings-row">
+          <label className="settings-label">{s.setting}</label>
           <ComboSelect
             name={s.setting}
             value={s.value}
@@ -200,9 +203,7 @@ const Drive = () => {
         </div>
       ))}
 
-      <Link to="/">
-        <button className='button'>Home</button>
-      </Link>
+      <Link to="/" className="button">Home</Link>
     </div>
   );
 };

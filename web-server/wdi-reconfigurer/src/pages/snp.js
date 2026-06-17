@@ -23,8 +23,10 @@ import '../general.css';
 const SNP = () => {
   const [driveSettings, setDriveSettings] = useState([]);
 
+  useEffect(() => { document.title = "SNP Settings | WIR"; }, []);
+
   useEffect(() => {
-    const getSettings = async (event) => {
+    const getSettings = async () => {
       const response = await fetch(ip.concat('/getDriveSettings'));
 
       if (!response.ok) {
@@ -66,12 +68,12 @@ const SNP = () => {
 
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="page">
       <h1>SNP</h1>
 
       {driveSettings.map((s, index) => (
-        <div key={index} style={{ marginBottom: '40px', display: 'grid' }}>
-          <label style={{ fontSize: '25px', fontWeight: 'bold' }}>{s.setting}</label>
+        <div key={index} className="settings-row">
+          <label className="settings-label">{s.setting}</label>
           <input
             type="number"
             name={s.setting}
@@ -83,9 +85,7 @@ const SNP = () => {
           />
         </div>
       ))}
-      <Link to="/">
-        <button className='button'>Home</button>
-      </Link>
+      <Link to="/" className="button">Home</Link>
     </div>
   );
 };

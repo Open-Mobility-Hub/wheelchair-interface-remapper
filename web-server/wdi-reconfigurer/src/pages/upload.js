@@ -21,12 +21,17 @@ import { ip } from '../App';
 import '../general.css';
 
 const Upload = () => {
+  const [error, setError] = React.useState(null);
+
+  useEffect(() => { document.title = "Upload | WIR"; }, []);
 
   useEffect(() => {
     const uploadSettings = async () => {
       const response = await fetch(ip.concat('/upload'))
       if (!response.ok) {
         console.error(`Error Uploading: ${response.status}`);
+        setError(`Error Uploading: ${response.status}`);
+        return;
       }
     };
 
@@ -34,14 +39,13 @@ const Upload = () => {
   }, []);
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="page">
       <h1>Upload</h1>
 
-      <h2>Successfully Uploaded!</h2>
+      {error ? <h2 style={{ color: 'red' }}>{error}</h2> :
+      <h2>Successfully Uploaded!</h2>}
 
-      <Link to="/">
-        <button className='button'>Home</button>
-      </Link>
+      <Link to="/" className="button">Home</Link>
     </div>
   );
 };
