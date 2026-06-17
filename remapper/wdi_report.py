@@ -14,12 +14,12 @@
 
 
 def drive_bytes(fb, lr):
-    lr_value = round(lr / 100 * 127)
+    lr_value = round(lr)
     if lr_value < 0:
         lr_value = 256 + lr_value  # two's complement
     report = bytes([lr_value])
 
-    fb_value = round(fb / 100 * 127)
+    fb_value = round(fb)
     if fb_value < 0:
         fb_value = 256 + fb_value  # two's complement
     report += bytes([fb_value])
