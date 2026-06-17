@@ -133,7 +133,6 @@ if __name__ == "__main__":
                 if active != "NONE":
                     if any(d[2] == 1 for d in state.devices):
                         try:
-                            print(f"Initializing {active} Remapper...")
                             r = create_remapper(state, "settings.json")
                         except ValueError as e:
                             print(f"Error creating remapper: {e}")
@@ -151,7 +150,6 @@ if __name__ == "__main__":
 
         else:
             if r.current_STATE == 1 and STATE == 0:
-                print("RUNNING --> CONFIGURING")
                 r.write_report(get_wdi_report(
                     0, 0, ["Disable Device Control"]))
                 r.write_report(get_wdi_report(0, 0, []))
@@ -167,7 +165,6 @@ if __name__ == "__main__":
                         break
 
             elif r.current_STATE == 0 and STATE == 1:
-                print("CONFIGURING --> RUNNING")
                 try:
                     r = create_remapper(state, "settings.json")
                 except ValueError as e:

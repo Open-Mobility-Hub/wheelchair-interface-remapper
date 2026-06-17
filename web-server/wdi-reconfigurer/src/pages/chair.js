@@ -66,7 +66,7 @@ const Chair = () => {
   useEffect(() => {
 
     const getSettings = async () => {
-    const response = await fetch(ip.concat(`/getChairSettings?layer=${layer}`));
+    const response = await fetch(ip.concat(`/getSettings?mode=Chair&layer=${layer}`));
 
     if (!response.ok) {
       console.error(`Error Get Chair Settings: ${response.status}`);

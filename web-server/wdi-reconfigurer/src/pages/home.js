@@ -67,7 +67,7 @@ const Home = () => {
 
     getInputs();
     getDevices();
-  }, []);
+  }, [setChosenInput]);
 
   useEffect(() => {
     const getLayer = async () => {

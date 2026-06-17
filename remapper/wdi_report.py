@@ -135,8 +135,7 @@ def get_wdi_report(fb, lr, buttons):
                 report += bytes([0x08])
             else:
                 report += bytes([0x00])
-    print("Report (binary):", ' '.join(format(byte, '08b') for byte in report))
-    
+
     return report
     
     

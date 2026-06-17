@@ -28,6 +28,3 @@ web-server/wdi-reconfigurer/.pnp
 web-server/wdi-reconfigurer/.pnp.js
 web-server/wdi-reconfigurer/coverage
 web-server/wdi-reconfigurer/build
-
-# External / proprietary ROS messages (provided separately)
-luci-ros2-msgs/
