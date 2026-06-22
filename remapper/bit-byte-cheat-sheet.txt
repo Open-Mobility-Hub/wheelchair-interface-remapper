@@ -36,7 +36,6 @@ Bit, bit shift cheat sheet
 (5, 1 << 6) BTN_TRIGGER_HAPPY15
 (5, 1 << 7) BTN_TRIGGER_HAPPY16
 
-# not implemented yet in the HID report
 (6, 1 << 0) BTN_TRIGGER_HAPPY17
 (6, 1 << 1) BTN_TRIGGER_HAPPY18
 (6, 1 << 2) BTN_TRIGGER_HAPPY19

@@ -125,6 +125,10 @@ The remapper writes HID reports to `/dev/hidg0`, created by `gadget/configfs.sh`
 the Linux USB gadget framework (ConfigFS + `libcomposite`). Run `gadget/configfs.sh`
 as root on each boot before starting `main.py`.
 
+`hid_desc.bin` is the USB HID Report Descriptor that defines the 10-byte report
+format. It was hand-written based on the [WDI example descriptors](https://github.com/Open-Mobility-Hub/wheelchair-digital-interface/blob/main/docs/usb/example-report-descriptors.md).
+See [`gadget/README.md`](gadget/README.md) for the annotated byte-by-byte breakdown.
+
 **One-time system configuration (OrangePi)**
 
 Add to `/boot/orangepiEnv.txt`:
@@ -142,6 +146,28 @@ Reboot after making these changes. The script requires root and must be run on
 every boot. How you invoke it depends on your setup (e.g. `@reboot` in crontab,
 a systemd unit, or manually). After a successful run, `/dev/hidg0` should exist.
 If it does not appear, check `dmesg` for gadget or UDC errors.
+
+## Wheelchair Digital Interface (WDI) Protocol 
+
+The HID reports produced by this remapper follow the [WDI (Wheelchair Digital Interface) USB interface specification](https://github.com/Open-Mobility-Hub/wheelchair-digital-interface/blob/main/docs/usb/wdi-usb-interface.md), targeting the **LUCI** smart wheelchair controller.
+
+The WDI specification designates certain buttons as implementation-specific, leaving vendors free to assign them as they choose. LUCI uses `BTN_EAST` as a proprietary "LUCI Button" whose function is not publicly documented. This mapping was reverse-engineered by probing the controller with a gamepad. The complete byte/bit mapping is defined in [`remapper/wdi_report.py`](remapper/wdi_report.py).
+
+### Report format
+
+Each report is **10 bytes**, written to `/dev/hidg0`:
+
+| Bytes | Content |
+| --- | --- |
+| 0 | Left/right drive axis — signed integer, two's complement, range −100 to 100 |
+| 1 | Forward/backward drive axis — signed integer, two's complement, range −100 to 100 |
+| 2–6 | Button bitfields (drive controls, lights, seating presets, and chair functions) |
+| 7 | Hat switch byte — encodes directional mode switching (neutral = `0x08`) |
+| 8–9 | Keyboard HID keycodes for speed and profile selection |
+
+### Adapting for a different controller
+
+If your wheelchair uses the WDI interface but not LUCI, the standard WDI mappings in [`remapper/wdi_report.py`](remapper/wdi_report.py) can be kept as-is. Remove or reassign the `LUCI Button` entry and replace it with your controller's implementation-specific mapping. The report length and [`gadget/hid_desc.bin`](gadget/hid_desc.bin) do not need to change.
 
 ## Contributing
 

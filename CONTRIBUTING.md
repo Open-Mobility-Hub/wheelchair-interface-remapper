@@ -35,8 +35,7 @@ hardware, but please test on real hardware before changing driving behavior.
 1. Fork the repository and create a feature branch.
 2. Keep changes focused; one logical change per pull request.
 3. Match the existing code style:
-   - Python: standard PEP 8; the ROS package is linted with `ament_flake8` and
-     `ament_pep257`.
+   - Python: standard PEP 8
    - JavaScript/React: follows the Create React App ESLint config.
 4. Add the Apache license header to any **new** source file (see existing files
    for the exact text).
@@ -45,7 +44,7 @@ hardware, but please test on real hardware before changing driving behavior.
 
 ## Tests / checks
 
-- Web UI: `npm test` and `npm run build` in `web-server/wdi-reconfigurer/`.
+- Web UI: `npm run build` in `web-server/wdi-reconfigurer/`.
 
 ## Licensing of contributions
 
